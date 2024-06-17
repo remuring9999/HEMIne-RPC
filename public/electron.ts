@@ -1,5 +1,5 @@
 import * as path from "path";
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import * as isDev from "electron-is-dev";
 
 const BASE_URL = "http://localhost:3000";
@@ -10,7 +10,6 @@ function createMainWindow(): void {
   mainWindow = new BrowserWindow({
     width: 470,
     height: 750,
-    // frame: false,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: true,

@@ -12,7 +12,7 @@ function Player({
   setUiState: any;
   songState: any;
   setSongState: any;
-  seekWidth: number; // Update the type of seekWidth to number
+  seekWidth: number;
 }) {
   return (
     <div className="player">

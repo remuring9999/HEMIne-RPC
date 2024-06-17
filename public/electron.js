@@ -9,7 +9,6 @@ function createMainWindow() {
     mainWindow = new electron_1.BrowserWindow({
         width: 470,
         height: 750,
-        // frame: false,
         webPreferences: {
             contextIsolation: true,
             nodeIntegration: true
