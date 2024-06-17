@@ -1,0 +1,28 @@
+.artwork {
+    height: $height-artwork;
+    width: $height-artwork;
+    border: $border-artwork;
+    border-radius: 50%;
+    overflow: hidden;
+    transition: border 300ms;
+
+    img {
+        height: $height-artwork;
+        width: $height-artwork;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+}
+
+@media only screen and (min-width: 900px) {
+    .artwork {
+        height: $height-artwork * 1.25;
+        width: $height-artwork * 1.25;
+        border-radius: 50%;
+
+        img {
+            height: $height-artwork * 1.25;
+            width: $height-artwork * 1.25;
+        }
+    }
+}
