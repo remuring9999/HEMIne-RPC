@@ -9,14 +9,6 @@ function App() {
     return sessionStorage.getItem("hasOpenedLogin") === "true";
   });
 
-  useEffect(() => {
-    if (!isLogin && !hasOpenedLogin) {
-      window.open("http://localhost:3000/login", "_blank");
-      setHasOpenedLogin(true);
-      sessionStorage.setItem("hasOpenedLogin", "true");
-    }
-  }, [isLogin, hasOpenedLogin]);
-
   return (
     <BrowserRouter>
       <Routes>
