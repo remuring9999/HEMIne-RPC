@@ -2,6 +2,7 @@ import * as path from "path";
 import { app, BrowserWindow, Notification, ipcMain } from "electron";
 import * as isDev from "electron-is-dev";
 import * as keytar from "keytar";
+import * as url from "url";
 
 const BASE_URL = "http://localhost:3000";
 const ipc = ipcMain;
@@ -28,7 +29,7 @@ function createMainWindow(): void {
     show: false,
     width: 1260,
     height: 700,
-    modal: true,
+    // modal: true,
     center: true,
     frame: false,
     resizable: false,
@@ -49,7 +50,6 @@ function createMainWindow(): void {
 
   if (isDev) {
     mainWindow.loadURL(BASE_URL);
-
     mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(path.join(__dirname, "../build/index.html"));
@@ -61,7 +61,19 @@ function createMainWindow(): void {
 
   keytar.findCredentials("discord").then((credentials) => {
     if (credentials.length === 0) {
-      childWindow?.loadURL("http://localhost:3000/login");
+      if (isDev) {
+        childWindow?.loadURL(BASE_URL + "/login");
+      } else {
+        childWindow?.loadURL(
+          url.format({
+            pathname: path.join(__dirname, "../build/index.html"),
+            protocol: "file:",
+            slashes: true,
+            hash: "/login",
+          })
+        );
+      }
+
       new Notification({
         title: "HEMIne Authentication",
         body: "Discord에 로그인되지 않았어요! 로그인을 진행해주세요!",

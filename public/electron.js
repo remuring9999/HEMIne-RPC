@@ -4,6 +4,7 @@ var path = require("path");
 var electron_1 = require("electron");
 var isDev = require("electron-is-dev");
 var keytar = require("keytar");
+var url = require("url");
 var BASE_URL = "http://localhost:3000";
 var ipc = electron_1.ipcMain;
 var mainWindow;
@@ -26,7 +27,7 @@ function createMainWindow() {
         show: false,
         width: 1260,
         height: 700,
-        modal: true,
+        // modal: true,
         center: true,
         frame: false,
         resizable: false,
@@ -54,7 +55,17 @@ function createMainWindow() {
     });
     keytar.findCredentials("discord").then(function (credentials) {
         if (credentials.length === 0) {
-            childWindow === null || childWindow === void 0 ? void 0 : childWindow.loadURL("http://localhost:3000/login");
+            if (isDev) {
+                childWindow === null || childWindow === void 0 ? void 0 : childWindow.loadURL(BASE_URL + "/login");
+            }
+            else {
+                childWindow === null || childWindow === void 0 ? void 0 : childWindow.loadURL(url.format({
+                    pathname: path.join(__dirname, "../build/index.html"),
+                    protocol: "file:",
+                    slashes: true,
+                    hash: "/login",
+                }));
+            }
             new electron_1.Notification({
                 title: "HEMIne Authentication",
                 body: "Discord에 로그인되지 않았어요! 로그인을 진행해주세요!",
