@@ -92,9 +92,11 @@ ipc.on("maximizeApp", function () {
 ipc.on("closeApp", function () {
     if (childWindow) {
         childWindow === null || childWindow === void 0 ? void 0 : childWindow.close();
+        childWindow = null;
         return;
     }
     mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.close();
+    mainWindow = null;
 });
 electron_1.app.on("ready", function () {
     createMainWindow();

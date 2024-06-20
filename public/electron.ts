@@ -101,9 +101,11 @@ ipc.on("maximizeApp", () => {
 ipc.on("closeApp", () => {
   if (childWindow) {
     childWindow?.close();
+    childWindow = null;
     return;
   }
   mainWindow?.close();
+  mainWindow = null;
 });
 
 app.on("ready", (): void => {

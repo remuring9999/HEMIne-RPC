@@ -1,9 +1,24 @@
 import css from "../../Styles/process.module.css";
 
 function TitleBar() {
+  const handleClose = () => {
+    console.log("close");
+    window.electron.ipcSend("closeApp");
+  };
+
+  const handleMaximize = () => {
+    console.log("maximize");
+    window.electron.ipcSend("maximizeApp");
+  };
+
+  const handleMinimize = () => {
+    console.log("minimize");
+    window.electron.ipcSend("minimizeApp");
+  };
+
   return (
     <div className={css.titlebar}>
-      <button id="min" className={css.min}>
+      <button id="min" className={css.min} onClick={handleMinimize}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="15"
@@ -13,7 +28,7 @@ function TitleBar() {
           <rect x="4" y="11" width="16" height="2" fill="#888a8a" />
         </svg>
       </button>
-      <button id="max" className={css.max}>
+      <button id="max" className={css.max} onClick={handleMaximize}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="15"
@@ -31,7 +46,7 @@ function TitleBar() {
           />
         </svg>
       </button>
-      <button id="close" className={css.close}>
+      <button id="close" className={css.close} onClick={handleClose}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="15"
