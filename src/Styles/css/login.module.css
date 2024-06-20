@@ -73,3 +73,11 @@
 .neon:hover::before {
   opacity: 0.8;
 }
+
+.loginNav {
+  -webkit-app-region: drag;
+  position: fixed;
+  width: 100%;
+  height: 30px;
+  top: 0;
+}

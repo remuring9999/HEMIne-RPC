@@ -59,19 +59,19 @@ function createMainWindow(): void {
     mainWindow = null;
   });
 
-  // keytar.findCredentials("discord").then((credentials) => {
-  //   if (credentials.length === 0) {
-  //     childWindow?.loadURL("http://localhost:3000/login");
-  //     new Notification({
-  //       title: "HEMIne Authentication",
-  //       body: "Discord에 로그인되지 않았어요! 로그인을 진행해주세요!",
-  //     }).show();
+  keytar.findCredentials("discord").then((credentials) => {
+    if (credentials.length === 0) {
+      childWindow?.loadURL("http://localhost:3000/login");
+      new Notification({
+        title: "HEMIne Authentication",
+        body: "Discord에 로그인되지 않았어요! 로그인을 진행해주세요!",
+      }).show();
 
-  //     childWindow?.once("ready-to-show", () => {
-  //       childWindow?.show();
-  //     });
-  //   }
-  // });
+      childWindow?.once("ready-to-show", () => {
+        childWindow?.show();
+      });
+    }
+  });
 }
 
 ipc.on("minimizeApp", () => {

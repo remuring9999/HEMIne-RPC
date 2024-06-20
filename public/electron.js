@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var path = require("path");
 var electron_1 = require("electron");
 var isDev = require("electron-is-dev");
+var keytar = require("keytar");
 var BASE_URL = "http://localhost:3000";
 var ipc = electron_1.ipcMain;
 var mainWindow;
@@ -51,18 +52,18 @@ function createMainWindow() {
     mainWindow.on("closed", function () {
         mainWindow = null;
     });
-    // keytar.findCredentials("discord").then((credentials) => {
-    //   if (credentials.length === 0) {
-    //     childWindow?.loadURL("http://localhost:3000/login");
-    //     new Notification({
-    //       title: "HEMIne Authentication",
-    //       body: "Discord에 로그인되지 않았어요! 로그인을 진행해주세요!",
-    //     }).show();
-    //     childWindow?.once("ready-to-show", () => {
-    //       childWindow?.show();
-    //     });
-    //   }
-    // });
+    keytar.findCredentials("discord").then(function (credentials) {
+        if (credentials.length === 0) {
+            childWindow === null || childWindow === void 0 ? void 0 : childWindow.loadURL("http://localhost:3000/login");
+            new electron_1.Notification({
+                title: "HEMIne Authentication",
+                body: "Discord에 로그인되지 않았어요! 로그인을 진행해주세요!",
+            }).show();
+            childWindow === null || childWindow === void 0 ? void 0 : childWindow.once("ready-to-show", function () {
+                childWindow === null || childWindow === void 0 ? void 0 : childWindow.show();
+            });
+        }
+    });
 }
 ipc.on("minimizeApp", function () {
     if (childWindow) {
