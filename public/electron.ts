@@ -1,9 +1,10 @@
 import * as path from "path";
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, Notification, ipcMain } from "electron";
 import * as isDev from "electron-is-dev";
 import * as keytar from "keytar";
 
 const BASE_URL = "http://localhost:3000";
+const ipc = ipcMain;
 
 let mainWindow: BrowserWindow | null;
 let childWindow: BrowserWindow | null;
@@ -13,7 +14,8 @@ function createMainWindow(): void {
     width: 470,
     height: 750,
     center: true,
-    // frame: false,
+    frame: false,
+    resizable: false,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: true,
@@ -41,6 +43,10 @@ function createMainWindow(): void {
     mainWindow?.show();
   });
 
+  if (process.platform == "win32") {
+    app.setAppUserModelId("HEMIne");
+  }
+
   if (isDev) {
     mainWindow.loadURL(BASE_URL);
 
@@ -53,16 +59,52 @@ function createMainWindow(): void {
     mainWindow = null;
   });
 
-  keytar.findCredentials("discord").then((credentials) => {
-    if (credentials.length === 0) {
-      childWindow?.loadURL("http://localhost:3000/login");
+  // keytar.findCredentials("discord").then((credentials) => {
+  //   if (credentials.length === 0) {
+  //     childWindow?.loadURL("http://localhost:3000/login");
+  //     new Notification({
+  //       title: "HEMIne Authentication",
+  //       body: "Discord에 로그인되지 않았어요! 로그인을 진행해주세요!",
+  //     }).show();
 
-      childWindow?.once("ready-to-show", () => {
-        childWindow?.show();
-      });
-    }
-  });
+  //     childWindow?.once("ready-to-show", () => {
+  //       childWindow?.show();
+  //     });
+  //   }
+  // });
 }
+
+ipc.on("minimizeApp", () => {
+  if (childWindow) {
+    childWindow?.minimize();
+    return;
+  }
+  mainWindow?.minimize();
+});
+
+ipc.on("maximizeApp", () => {
+  if (childWindow) {
+    if (childWindow?.isMaximized()) {
+      childWindow?.restore();
+    } else {
+      childWindow?.maximize();
+    }
+    return;
+  }
+  if (mainWindow?.isMaximized()) {
+    mainWindow?.restore();
+  } else {
+    mainWindow?.maximize();
+  }
+});
+
+ipc.on("closeApp", () => {
+  if (childWindow) {
+    childWindow?.close();
+    return;
+  }
+  mainWindow?.close();
+});
 
 app.on("ready", (): void => {
   createMainWindow();

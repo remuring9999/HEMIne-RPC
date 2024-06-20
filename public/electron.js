@@ -3,8 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var path = require("path");
 var electron_1 = require("electron");
 var isDev = require("electron-is-dev");
-var keytar = require("keytar");
 var BASE_URL = "http://localhost:3000";
+var ipc = electron_1.ipcMain;
 var mainWindow;
 var childWindow;
 function createMainWindow() {
@@ -12,7 +12,8 @@ function createMainWindow() {
         width: 470,
         height: 750,
         center: true,
-        // frame: false,
+        frame: false,
+        resizable: false,
         webPreferences: {
             contextIsolation: true,
             nodeIntegration: true,
@@ -37,6 +38,9 @@ function createMainWindow() {
     mainWindow.once("ready-to-show", function () {
         mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.show();
     });
+    if (process.platform == "win32") {
+        electron_1.app.setAppUserModelId("HEMIne");
+    }
     if (isDev) {
         mainWindow.loadURL(BASE_URL);
         mainWindow.webContents.openDevTools();
@@ -47,15 +51,50 @@ function createMainWindow() {
     mainWindow.on("closed", function () {
         mainWindow = null;
     });
-    keytar.findCredentials("discord").then(function (credentials) {
-        if (credentials.length === 0) {
-            childWindow === null || childWindow === void 0 ? void 0 : childWindow.loadURL("http://localhost:3000/login");
-            childWindow === null || childWindow === void 0 ? void 0 : childWindow.once("ready-to-show", function () {
-                childWindow === null || childWindow === void 0 ? void 0 : childWindow.show();
-            });
-        }
-    });
+    // keytar.findCredentials("discord").then((credentials) => {
+    //   if (credentials.length === 0) {
+    //     childWindow?.loadURL("http://localhost:3000/login");
+    //     new Notification({
+    //       title: "HEMIne Authentication",
+    //       body: "Discord에 로그인되지 않았어요! 로그인을 진행해주세요!",
+    //     }).show();
+    //     childWindow?.once("ready-to-show", () => {
+    //       childWindow?.show();
+    //     });
+    //   }
+    // });
 }
+ipc.on("minimizeApp", function () {
+    if (childWindow) {
+        childWindow === null || childWindow === void 0 ? void 0 : childWindow.minimize();
+        return;
+    }
+    mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.minimize();
+});
+ipc.on("maximizeApp", function () {
+    if (childWindow) {
+        if (childWindow === null || childWindow === void 0 ? void 0 : childWindow.isMaximized()) {
+            childWindow === null || childWindow === void 0 ? void 0 : childWindow.restore();
+        }
+        else {
+            childWindow === null || childWindow === void 0 ? void 0 : childWindow.maximize();
+        }
+        return;
+    }
+    if (mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.isMaximized()) {
+        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.restore();
+    }
+    else {
+        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.maximize();
+    }
+});
+ipc.on("closeApp", function () {
+    if (childWindow) {
+        childWindow === null || childWindow === void 0 ? void 0 : childWindow.close();
+        return;
+    }
+    mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.close();
+});
 electron_1.app.on("ready", function () {
     createMainWindow();
 });

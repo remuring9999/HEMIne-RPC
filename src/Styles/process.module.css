@@ -1,0 +1,34 @@
+::-webkit-scrollbar {
+  display: none;
+}
+
+.titlebar {
+  -webkit-app-region: drag;
+  position: fixed;
+  width: 100%;
+  height: 30px;
+}
+
+.min {
+  position: absolute;
+  right: 80px;
+  top: 5px;
+  background-color: transparent;
+  border: none;
+}
+
+.max {
+  position: absolute;
+  right: 45px;
+  top: 5px;
+  background-color: transparent;
+  border: none;
+}
+
+.close {
+  position: absolute;
+  right: 10px;
+  top: 5px;
+  background-color: transparent;
+  border: none;
+}

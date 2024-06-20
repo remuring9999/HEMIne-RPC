@@ -6,6 +6,7 @@ import Library from "../Layouts/Library";
 import songData from "../Data/SongData";
 import { useState } from "react";
 import "../Styles/Home.scss";
+import TitleBar from "src/Components/Main/TitleBar";
 
 function Home() {
   let userDarkModeApplied = window.matchMedia(
@@ -44,6 +45,7 @@ function Home() {
         }`,
       }}
     >
+      <TitleBar />
       <MenuHeader />
       <Artwork uiState={uiState} songState={songState} />
       <SongInfo songState={songState} />
