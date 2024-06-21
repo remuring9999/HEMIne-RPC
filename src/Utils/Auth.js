@@ -1,8 +1,7 @@
 require("dotenv").config();
-const { shell } = require("electron");
 const axios = require("axios");
-const { AxiosError } = require("axios");
 const express = require("express");
+const keytar = require("keytar");
 
 class AuthClient {
   constructor() {
@@ -21,24 +20,24 @@ class AuthClient {
         code: String(req.query.code),
       };
 
-      const request = await axios.post(
-        "https://discordapp.com/api/oauth2/token",
-        data,
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
+      try {
+        const request = await axios.post(
+          "https://discordapp.com/api/oauth2/token",
+          data,
+          {
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
 
-          responseType: "json",
-        }
-      );
+            responseType: "json",
+          }
+        );
 
-      if (request instanceof AxiosError) {
-        console.log(request.response?.data);
-        return;
+        const accessToken = request.data.access_token;
+        const refreshToken = request.data.refresh_token;
+      } catch {
+        return res.send("An error occurred while trying to authenticate.");
       }
-
-      res.status(200).send(request.data);
     });
   }
 

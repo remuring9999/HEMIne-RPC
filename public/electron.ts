@@ -123,6 +123,8 @@ ipc.on("closeApp", () => {
 
 ipc.on("login", () => {
   if (childWindow) {
+    childWindow.setSize(850, 950);
+    childWindow.center();
     const auth = new AuthClient();
     childWindow.loadURL(auth.getAuthURL());
   }

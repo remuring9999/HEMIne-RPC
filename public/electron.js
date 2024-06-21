@@ -112,6 +112,8 @@ ipc.on("closeApp", function () {
 });
 ipc.on("login", function () {
     if (childWindow) {
+        childWindow.setSize(850, 950);
+        childWindow.center();
         var auth = new Auth_1.AuthClient();
         childWindow.loadURL(auth.getAuthURL());
     }
