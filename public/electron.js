@@ -5,6 +5,7 @@ var electron_1 = require("electron");
 var isDev = require("electron-is-dev");
 var keytar = require("keytar");
 var url = require("url");
+var Auth_1 = require("../src/Utils/Auth");
 var BASE_URL = "http://localhost:3000";
 var ipc = electron_1.ipcMain;
 var mainWindow;
@@ -27,7 +28,7 @@ function createMainWindow() {
         show: false,
         width: 1260,
         height: 700,
-        // modal: true,
+        modal: true,
         center: true,
         frame: false,
         resizable: false,
@@ -56,7 +57,7 @@ function createMainWindow() {
     keytar.findCredentials("discord").then(function (credentials) {
         if (credentials.length === 0) {
             if (isDev) {
-                childWindow === null || childWindow === void 0 ? void 0 : childWindow.loadURL(BASE_URL + "/login");
+                childWindow === null || childWindow === void 0 ? void 0 : childWindow.loadURL(BASE_URL + "#login");
             }
             else {
                 childWindow === null || childWindow === void 0 ? void 0 : childWindow.loadURL(url.format({
@@ -108,6 +109,12 @@ ipc.on("closeApp", function () {
     }
     mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.close();
     mainWindow = null;
+});
+ipc.on("login", function () {
+    if (childWindow) {
+        var auth = new Auth_1.AuthClient();
+        childWindow.loadURL(auth.getAuthURL());
+    }
 });
 electron_1.app.on("ready", function () {
     createMainWindow();

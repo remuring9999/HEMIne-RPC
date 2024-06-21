@@ -14,6 +14,10 @@ function Login() {
     window.electron.ipcSend("closeApp");
   };
 
+  const handleLogin = () => {
+    window.electron.ipcSend("login");
+  };
+
   return (
     <div className={css.loginContainer}>
       <button
@@ -57,7 +61,9 @@ function Login() {
         speedFactor={0.1}
         backgroundColor="black"
       />
-      <a className={css.neon}>Sign in with Discord</a>
+      <a className={css.neon} onClick={handleLogin}>
+        Sign in with Discord
+      </a>
     </div>
   );
 }
