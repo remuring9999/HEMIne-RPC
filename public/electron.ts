@@ -3,7 +3,7 @@ import { app, BrowserWindow, Notification, ipcMain } from "electron";
 import * as isDev from "electron-is-dev";
 import * as keytar from "keytar";
 import * as url from "url";
-import { AuthClient } from "../src/Utils/Auth";
+import { AuthClient } from "./Auth";
 
 const BASE_URL = "http://localhost:3000";
 const ipc = ipcMain;
@@ -87,6 +87,10 @@ function createMainWindow(): void {
   });
 }
 
+function receiveTokens(tokens: { accessToken: string; refreshToken: string }) {
+  console.log("Received tokens from auth.js:", tokens);
+}
+
 ipc.on("minimizeApp", () => {
   if (childWindow) {
     childWindow?.minimize();
@@ -125,7 +129,7 @@ ipc.on("login", () => {
   if (childWindow) {
     childWindow.setSize(850, 950);
     childWindow.center();
-    const auth = new AuthClient();
+    const auth = new AuthClient(receiveTokens);
     childWindow.loadURL(auth.getAuthURL());
   }
 });

@@ -1,11 +1,11 @@
 require("dotenv").config();
 const axios = require("axios");
 const express = require("express");
-const keytar = require("keytar");
 
 class AuthClient {
-  constructor() {
+  constructor(handleAuthTokens) {
     this.expressApp = express();
+    this.handleAuthTokens = handleAuthTokens;
 
     this._server = this.expressApp.listen(
       process.env.REACT_APP_DISCORD_LISTEN_PORT
@@ -28,14 +28,19 @@ class AuthClient {
             headers: {
               "Content-Type": "application/x-www-form-urlencoded",
             },
-
             responseType: "json",
           }
         );
 
         const accessToken = request.data.access_token;
         const refreshToken = request.data.refresh_token;
-      } catch {
+
+        this.handleAuthTokens({ accessToken, refreshToken });
+        await this.stopListening();
+        return res.send("Authentication successful! Redirecting ..");
+      } catch (error) {
+        console.error(error);
+        await this.stopListening();
         return res.send("An error occurred while trying to authenticate.");
       }
     });
