@@ -129,7 +129,13 @@ ipc.on("login", () => {
   if (childWindow) {
     childWindow.setSize(850, 950);
     childWindow.center();
-    const auth = new AuthClient(receiveTokens);
+    const auth = new AuthClient(
+      receiveTokens,
+      "1212287206702583829",
+      "7plMXfI4PuvxMG-EVxZx7fyyJTZ1eH5i",
+      "http://localhost:205/auth/discord/callback",
+      205
+    );
     childWindow.loadURL(auth.getAuthURL());
   }
 });

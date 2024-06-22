@@ -3,20 +3,26 @@ const axios = require("axios");
 const express = require("express");
 
 class AuthClient {
-  constructor(handleAuthTokens) {
+  constructor(
+    handleAuthTokens,
+    client_id,
+    client_secret,
+    redirect_uri,
+    listen_port
+  ) {
     this.expressApp = express();
     this.handleAuthTokens = handleAuthTokens;
-
-    this._server = this.expressApp.listen(
-      process.env.REACT_APP_DISCORD_LISTEN_PORT
-    );
+    this._server = this.expressApp.listen(listen_port);
+    this.client_id = client_id;
+    this.client_secret = client_secret;
+    this.redirect_uri = redirect_uri;
 
     this.expressApp.get("/auth/discord/callback", async (req, res) => {
       const data = {
-        client_id: process.env.REACT_APP_DISCORD_CLIENT_ID,
-        client_secret: process.env.REACT_APP_DISCORD_CLIENT_SECRET,
+        client_id: client_id,
+        client_secret: client_secret,
         grant_type: "authorization_code",
-        redirect_uri: process.env.REACT_APP_DISCORD_REDIRECT_URI,
+        redirect_uri: redirect_uri,
         code: String(req.query.code),
       };
 
@@ -53,9 +59,9 @@ class AuthClient {
   getAuthURL = () => {
     return `
       https://discord.com/api/oauth2/authorize?client_id=${
-        process.env.REACT_APP_DISCORD_CLIENT_ID
+        this.client_id
       }&redirect_uri=${encodeURI(
-      process.env.REACT_APP_DISCORD_REDIRECT_URI
+      this.redirect_uri
     )}&response_type=code&scope=identify+rpc+rpc.voice.read`;
   };
 }

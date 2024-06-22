@@ -12,7 +12,7 @@
 .min,
 .max,
 .close {
-  -webkit-app-region: no-drag; /* 추가된 코드 */
+  -webkit-app-region: no-drag;
   position: fixed;
   background-color: transparent;
   border: none;
