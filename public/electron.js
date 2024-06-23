@@ -46,6 +46,8 @@ var BASE_URL = "http://localhost:3000";
 var ipc = electron_1.ipcMain;
 var mainWindow;
 var childWindow;
+var connectionWindow;
+var connectionWindowEnabled = false;
 function createMainWindow() {
     var _this = this;
     mainWindow = new electron_1.BrowserWindow({
@@ -65,6 +67,21 @@ function createMainWindow() {
         show: false,
         width: 1260,
         height: 700,
+        modal: true,
+        center: true,
+        frame: false,
+        resizable: false,
+        webPreferences: {
+            contextIsolation: true,
+            nodeIntegration: true,
+            preload: path.join(__dirname, "preload.js"),
+        },
+    });
+    connectionWindow = new electron_1.BrowserWindow({
+        parent: mainWindow,
+        show: false,
+        width: 660,
+        height: 460,
         modal: true,
         center: true,
         frame: false,
@@ -246,6 +263,31 @@ ipc.on("login", function () {
     else {
         return;
     }
+});
+ipc.on("openConnection", function (_event, user) {
+    if (connectionWindowEnabled) {
+        connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.show();
+        return;
+    }
+    if (isDev) {
+        connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.loadURL(BASE_URL + "#connection");
+    }
+    else {
+        connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.loadURL(url.format({
+            pathname: path.join(__dirname, "../build/index.html"),
+            protocol: "file:",
+            slashes: true,
+            hash: "/connection",
+        }));
+    }
+    connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.once("ready-to-show", function () {
+        connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.show();
+        connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("userData", user);
+        connectionWindowEnabled = true;
+    });
+});
+ipc.on("CloseConnection", function () {
+    connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.hide();
 });
 electron_1.app.on("ready", function () {
     createMainWindow();

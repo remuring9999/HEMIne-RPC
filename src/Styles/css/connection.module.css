@@ -1,10 +1,9 @@
-body {
+.app {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     margin: 0;
-    background-color: green;
 }
 
 .contain {
@@ -20,7 +19,6 @@ body {
     width: 660px;
     height: 100px;
     border-radius: 10px 10px 0 0;
-    background: url('https://cdn.discordapp.com/banners/868016688090710067/d36120898f72dbeec0fff612182b0348.png?size=4096');
     background-size: cover;
     background-position: center;
 }

@@ -1,4 +1,4 @@
-import colors from "../../../Utils/Colors";
+import colors from "../../../Constants/Colors";
 import shadow from "../../../Utils/Shadows";
 
 function LibrarySongCover({ song }: { song: SongData }) {

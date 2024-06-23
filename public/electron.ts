@@ -10,6 +10,8 @@ const ipc = ipcMain;
 
 let mainWindow: BrowserWindow | null;
 let childWindow: BrowserWindow | null;
+let connectionWindow: BrowserWindow | null;
+let connectionWindowEnabled = false;
 
 function createMainWindow(): void {
   mainWindow = new BrowserWindow({
@@ -30,6 +32,22 @@ function createMainWindow(): void {
     show: false,
     width: 1260,
     height: 700,
+    modal: true,
+    center: true,
+    frame: false,
+    resizable: false,
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: true,
+      preload: path.join(__dirname, "preload.js"),
+    },
+  });
+
+  connectionWindow = new BrowserWindow({
+    parent: mainWindow,
+    show: false,
+    width: 660,
+    height: 460,
     modal: true,
     center: true,
     frame: false,
@@ -233,6 +251,35 @@ ipc.on("login", () => {
   } else {
     return;
   }
+});
+
+ipc.on("openConnection", (_event, user) => {
+  if (connectionWindowEnabled) {
+    connectionWindow?.show();
+    return;
+  }
+  if (isDev) {
+    connectionWindow?.loadURL(BASE_URL + "#connection");
+  } else {
+    connectionWindow?.loadURL(
+      url.format({
+        pathname: path.join(__dirname, "../build/index.html"),
+        protocol: "file:",
+        slashes: true,
+        hash: "/connection",
+      })
+    );
+  }
+
+  connectionWindow?.once("ready-to-show", () => {
+    connectionWindow?.show();
+    connectionWindow?.webContents.send("userData", user);
+    connectionWindowEnabled = true;
+  });
+});
+
+ipc.on("CloseConnection", () => {
+  connectionWindow?.hide();
 });
 
 app.on("ready", (): void => {

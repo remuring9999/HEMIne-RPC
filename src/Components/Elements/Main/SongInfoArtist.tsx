@@ -1,4 +1,4 @@
-import colors from "../../../Utils/Colors";
+import colors from "../../../Constants/Colors";
 
 function SongInfoArtist({ songState }: { songState: SongState }) {
   return (

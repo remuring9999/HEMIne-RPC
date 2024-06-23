@@ -1,6 +1,6 @@
 import React from "react";
-import colors from "../../../Utils/Colors";
-import gradients from "../../../Utils/Gradients";
+import colors from "../../../Constants/Colors";
+import gradients from "../../../Constants/Gradients";
 import shadow from "../../../Utils/Shadows";
 
 function PlayerSeekBar({

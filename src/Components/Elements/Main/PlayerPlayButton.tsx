@@ -1,8 +1,8 @@
 import { RiPlayFill } from "react-icons/ri";
 import { IoIosPause } from "react-icons/io";
 import shadow from "../../../Utils/Shadows";
-import colors from "../../../Utils/Colors";
-import gradients from "../../../Utils/Gradients";
+import colors from "../../../Constants/Colors";
+import gradients from "../../../Constants/Gradients";
 
 function PlayerPlayButton({
   uiState,

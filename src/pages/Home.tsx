@@ -11,6 +11,7 @@ import Notification from "../Components/Function/Notification";
 
 import songData from "../Data/SongData";
 import "../Styles/Home.scss";
+import { APIUser } from "discord-api-types/v10";
 
 function Home() {
   let userDarkModeApplied = window.matchMedia(
@@ -33,8 +34,13 @@ function Home() {
     duration: 0,
   });
 
+  const [userState, setUserState] = useState<APIUser | undefined>();
+  const [isLoaded, setIsLoaded] = useState(false);
+
   window.electron.ipcReceive("login", async (data) => {
     const alert = await Notification(userDarkModeApplied ? true : false);
+    setUserState(data);
+    setIsLoaded(true);
     alert.fire({
       icon: "success",
       title: `반갑다네 ${data.username}!`,
@@ -42,6 +48,10 @@ function Home() {
       timerProgressBar: true,
     });
   });
+
+  if (!isLoaded) {
+    return <div>세상에서 가장지루한 중학교는 로딩중</div>;
+  }
 
   document.body.style.backgroundImage = `url('${songState.currentSong[0].coverUrl}')`;
   return (
@@ -72,7 +82,7 @@ function Home() {
         songState={songState}
         songData={songData}
       />
-      <Discord />
+      <Discord rpcConnected={false} user={userState} />
     </div>
   );
 }
