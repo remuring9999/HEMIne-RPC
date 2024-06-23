@@ -1,0 +1,127 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: green;
+}
+
+.contain {
+    position: relative;
+    display: flex;
+    width: 660px;
+    height: 460px;
+    background: #1E1F22;
+    border-radius: 10px;
+}
+
+.banner {
+    width: 660px;
+    height: 100px;
+    border-radius: 10px 10px 0 0;
+    background: url('https://cdn.discordapp.com/banners/868016688090710067/d36120898f72dbeec0fff612182b0348.png?size=4096');
+    background-size: cover;
+    background-position: center;
+}
+
+.profile {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: #1E1F22;
+    position: absolute;
+    top: 70px;
+    left: 25px;
+}
+
+.profile img {
+    padding: 6px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+}
+
+.nickname {
+    color: #FFFFFF;
+    font-size: 20px;
+    font-weight: 500;
+    position: absolute;
+    top: 120px;
+    left: 140px;
+}
+
+.status {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background-color: #1E1F22;
+    position: absolute;
+    top: 70px;
+    left: 70px;
+}
+
+.statusOnline {
+    position: absolute;
+    background-color: #43B581;
+    top: 4px;
+    left: 4px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+}
+
+.badgesContain {
+    width: auto;
+    height: 30px;
+    min-width: 30px;
+    box-sizing: border-box;
+    background-color: #2B2D31;
+    border-radius: 8px;
+    position: absolute;
+    top: 150px;
+    left: 140px;
+}
+
+.badgesContain img {
+    width: 24px;
+    height: 24px;
+    border-radius: 5px;
+    margin: 3px;
+}
+
+.userInfoContain {
+    width: 630px;
+    height: 250px;
+    background-color: #2B2D31;
+    position: absolute;
+    top: 190px;
+    left: 15px;
+    border-radius: 10px;
+}
+
+.userInfoContain li {
+    margin-left: 10px;
+    margin-top: 10px;
+    padding-top: 2px;
+}
+
+.userInfoContain ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.userInfoContain h3 {
+    color: #B5BAB8;
+    font-size: 12px;
+    font-weight: 500;
+    margin: 5px 10px;
+}
+
+.userInfoContain p {
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: 300;
+    margin: 5px 10px;
+}

@@ -1,9 +1,11 @@
 import { Dispatch, SetStateAction } from "react";
+import ThemeColors from "../src/Utils/Colors";
 
 declare global {
   interface Window {
     electron: {
       ipcSend: (channel: string, data?: any) => void;
+      ipcReceive: (channel: string, func: (data: any) => void) => void;
     };
   }
 
@@ -15,7 +17,6 @@ declare global {
   }
 
   interface UiState {
-    aboutShown: Boolean;
     libraryShown: Boolean;
     libraryPinned: Boolean;
     darkMode: Boolean;
@@ -31,7 +32,7 @@ declare global {
     artist: string;
     coverUrl: string;
     thumbUrl: string;
-    palette: string;
+    palette: keyof typeof ThemeColors;
     id: string;
   }
 }

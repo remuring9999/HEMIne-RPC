@@ -5,7 +5,6 @@ import {
   RiSkipBackLine,
   RiSkipForwardLine,
 } from "react-icons/ri";
-import songData from "../../Data/SongData";
 import PlayerPlayButton from "../Elements/Main/PlayerPlayButton";
 
 function PlayerControl({
@@ -19,35 +18,6 @@ function PlayerControl({
   songState: SongState;
   setSongState: ReactSetAction<SongState>;
 }) {
-  let currentIndex = songData.findIndex(
-    (song) => song === songState.currentSong[0]
-  );
-
-  const previousSongHandler = () => {
-    setTimeout(() => {
-      if ((currentIndex - 1) % songData.length === -1) {
-        setSongState({
-          ...songState,
-          currentSong: [songData[songData.length - 1]],
-        });
-      } else {
-        setSongState({
-          ...songState,
-          currentSong: [songData[(currentIndex - 1) % songData.length]],
-        });
-      }
-    }, 300);
-  };
-
-  const nextSongHandler = () => {
-    setTimeout(() => {
-      setSongState({
-        ...songState,
-        currentSong: [songData[(currentIndex + 1) % songData.length]],
-      });
-    }, 150);
-  };
-
   const darkModeToggleHandler = () => {
     setUiState({ ...uiState, darkMode: !uiState.darkMode });
   };
@@ -56,15 +26,7 @@ function PlayerControl({
     if (!window.visualViewport) return;
     if (window.visualViewport.width < 900) {
       setUiState({ ...uiState, libraryShown: true });
-      console.log("changed");
     }
-  };
-
-  const songEndHandler = async () => {
-    await setSongState({
-      ...songState,
-      currentSong: [songData[(currentIndex + 1) % songData.length]],
-    });
   };
 
   const DarkModeButton = () => {
@@ -91,20 +53,14 @@ function PlayerControl({
         className="player__control-icon disabled-on-desktop"
         onClick={libraryToggleHandler}
       />
-      <RiSkipBackLine
-        className="player__control-icon"
-        onClick={previousSongHandler}
-      />
+      <RiSkipBackLine className="player__control-icon" />
       <PlayerPlayButton
         uiState={uiState}
         setUiState={setUiState}
         setSongState={setSongState}
         songState={songState}
       />
-      <RiSkipForwardLine
-        className="player__control-icon"
-        onClick={nextSongHandler}
-      />
+      <RiSkipForwardLine className="player__control-icon" />
       <DarkModeButton />
     </div>
   );

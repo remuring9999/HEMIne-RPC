@@ -1,21 +1,20 @@
-import { useState, useEffect } from "react";
 import { HashRouter, Route, Routes } from "react-router-dom";
+
 import Home from "./pages/Home";
 import Error from "./pages/Error";
 import Login from "./pages/Login";
+import Connection from "./pages/Connection";
+import NotFound from "./pages/NotFound";
 
 function App() {
-  const [isLogin, setLogin] = useState(false);
-  const [hasOpenedLogin, setHasOpenedLogin] = useState(() => {
-    return sessionStorage.getItem("hasOpenedLogin") === "true";
-  });
-
   return (
     <HashRouter>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/error" element={<Error />} />
+        <Route path="/connection" element={<Connection />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </HashRouter>
   );

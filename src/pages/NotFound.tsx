@@ -1,17 +1,13 @@
 import Starfield from "react-starfield";
-import css from "../Styles/css/login.module.css";
+import css from "../Styles/css/error.module.css";
 
-function Login() {
+function NotFound() {
   const handleClose = () => {
     window.electron.ipcSend("closeApp");
   };
 
-  const handleLogin = () => {
-    window.electron.ipcSend("login");
-  };
-
   return (
-    <div className={css.loginContainer}>
+    <div>
       <button
         id="close"
         style={{
@@ -47,17 +43,17 @@ function Login() {
           />
         </svg>
       </button>
+      <div className={css.container}>
+        <div className={css.text}>여기가 어디 .. 404</div>
+      </div>
       <Starfield
         starCount={10000}
         starColor={[255, 255, 255]}
         speedFactor={0.1}
         backgroundColor="black"
       />
-      <p className={css.neon} onClick={handleLogin}>
-        Sign in with Discord
-      </p>
     </div>
   );
 }
 
-export default Login;
+export default NotFound;

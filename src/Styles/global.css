@@ -1,0 +1,17 @@
+.swal-popup {
+    font-family: "AppleNeoM";
+    font-weight: 400;
+    font-size: 14px;
+}
+
+.swal-title-light {
+    color: #000;
+    font-weight: bold;
+    text-shadow: none;
+}
+
+.swal-title-dark {
+    color: #fff;
+    font-weight: 100;
+    text-shadow: none;
+}

@@ -2,17 +2,14 @@ import css from "../../Styles/process.module.css";
 
 function TitleBar() {
   const handleClose = () => {
-    console.log("close");
     window.electron.ipcSend("closeApp");
   };
 
   const handleMaximize = () => {
-    console.log("maximize");
     window.electron.ipcSend("maximizeApp");
   };
 
   const handleMinimize = () => {
-    console.log("minimize");
     window.electron.ipcSend("minimizeApp");
   };
 

@@ -1,0 +1,21 @@
+.contain {
+    position: absolute;
+    cursor: pointer;
+    display: flex;
+    left: 5px;
+    bottom: 5px;
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+    fill: #F58770;
+}
+
+.overText {
+    color: #F58770;
+    font-size: 12px;
+    font-weight: 300;
+    margin-left: 5px;
+    margin-top: 2px;
+}

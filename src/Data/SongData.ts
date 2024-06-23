@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 
-const songData = [
+const songData: SongData[] = [
   {
     title: "QWER '고민중독'｜Cover by 주르르",
     artist: "주르르 JURURU",

@@ -16,6 +16,7 @@ class AuthClient {
     this.client_id = client_id;
     this.client_secret = client_secret;
     this.redirect_uri = redirect_uri;
+    this.result = false;
 
     this.expressApp.get("/auth/discord/callback", async (req, res) => {
       const data = {
@@ -28,7 +29,7 @@ class AuthClient {
 
       try {
         const request = await axios.post(
-          "https://discordapp.com/api/oauth2/token",
+          "https://discord.com/api/oauth2/token",
           data,
           {
             headers: {
@@ -41,16 +42,58 @@ class AuthClient {
         const accessToken = request.data.access_token;
         const refreshToken = request.data.refresh_token;
 
-        this.handleAuthTokens({ accessToken, refreshToken });
+        this.result = true;
+        this.handleAuthTokens(this, { accessToken, refreshToken });
         await this.stopListening();
         return res.send("Authentication successful! Redirecting ..");
       } catch (error) {
-        console.error(error);
         await this.stopListening();
         return res.send("An error occurred while trying to authenticate.");
       }
     });
   }
+
+  getIdentify = async (accessToken) => {
+    try {
+      const request = await axios.get("https://discord.com/api/users/@me", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        responseType: "json",
+      });
+
+      return request.data;
+    } catch {
+      return null;
+    }
+  };
+
+  refreshToken = async (refreshToken) => {
+    const data = {
+      client_id: this.client_id,
+      client_secret: this.client_secret,
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+    };
+
+    try {
+      const request = await axios.post(
+        "https://discord.com/api/oauth2/token",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          responseType: "json",
+        }
+      );
+
+      return request.data;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  };
 
   stopListening = () => {
     this._server.close();

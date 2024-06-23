@@ -5,7 +5,9 @@ import Artwork from "../Components/Elements/Main/Artwork";
 import SongInfo from "../Components/Main/SongInfo";
 import Player from "../Components/Layouts/Player";
 import Library from "../Components/Layouts/Library";
-import TitleBar from "src/Components/Main/TitleBar";
+import TitleBar from "../Components/Main/TitleBar";
+import Discord from "../Components/Elements/Main/Discord";
+import Notification from "../Components/Function/Notification";
 
 import songData from "../Data/SongData";
 import "../Styles/Home.scss";
@@ -16,7 +18,6 @@ function Home() {
   ).matches;
 
   const [uiState, setUiState] = useState<UiState>({
-    aboutShown: false,
     libraryShown: false,
     libraryPinned: false,
     darkMode: userDarkModeApplied ? true : false,
@@ -32,6 +33,16 @@ function Home() {
     duration: 0,
   });
 
+  window.electron.ipcReceive("login", async (data) => {
+    const alert = await Notification(userDarkModeApplied ? true : false);
+    alert.fire({
+      icon: "success",
+      title: `반갑다네 ${data.username}!`,
+      timer: 5000,
+      timerProgressBar: true,
+    });
+  });
+
   document.body.style.backgroundImage = `url('${songState.currentSong[0].coverUrl}')`;
   return (
     <div
@@ -39,11 +50,9 @@ function Home() {
         uiState.darkMode ? "dark-mode" : "light-mode"
       }`}
       style={{
-        backdropFilter: `${
-          uiState.libraryShown || uiState.aboutShown ? "none" : "blur(1.5rem)"
-        }`,
+        backdropFilter: `${uiState.libraryShown ? "none" : "blur(1.5rem)"}`,
         WebkitBackdropFilter: `${
-          uiState.libraryShown || uiState.aboutShown ? "none" : "blur(1.5rem)"
+          uiState.libraryShown ? "none" : "blur(1.5rem)"
         }`,
       }}
     >
@@ -63,6 +72,7 @@ function Home() {
         songState={songState}
         songData={songData}
       />
+      <Discord />
     </div>
   );
 }

@@ -8,7 +8,7 @@ function MenuIcon({
   setUiState: ReactSetAction<UiState>;
 }) {
   const navHandler = () => {
-    setUiState({ ...uiState, aboutShown: true });
+    setUiState({ ...uiState });
   };
   return <RiMenu4Fill className="menu__icon" onClick={navHandler} />;
 }

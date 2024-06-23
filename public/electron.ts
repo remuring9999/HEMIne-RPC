@@ -45,69 +45,168 @@ function createMainWindow(): void {
     mainWindow?.show();
   });
 
+  mainWindow.on("closed", (): void => {
+    mainWindow = null;
+  });
+
   if (process.platform == "win32") {
     app.setAppUserModelId("HEMIne");
   }
 
   if (isDev) {
     mainWindow.loadURL(BASE_URL);
-    mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(path.join(__dirname, "../build/index.html"));
   }
 
-  mainWindow.on("closed", (): void => {
-    mainWindow = null;
-  });
-
-  keytar.findCredentials("discord").then((credentials) => {
+  keytar.findCredentials("discord").then(async (credentials) => {
     if (credentials.length === 0) {
-      if (isDev) {
-        childWindow?.loadURL(BASE_URL + "#login");
-      } else {
-        childWindow?.loadURL(
-          url.format({
-            pathname: path.join(__dirname, "../build/index.html"),
-            protocol: "file:",
-            slashes: true,
-            hash: "/login",
-          })
-        );
-      }
-
-      new Notification({
-        title: "HEMIne Authentication",
-        body: "Discord에 로그인되지 않았어요! 로그인을 진행해주세요!",
-      }).show();
-
+      isNotLogin();
       childWindow?.once("ready-to-show", () => {
         childWindow?.show();
       });
+    } else {
+      const token = await keytar.getPassword("discord", "refreshToken");
+
+      const auth = new AuthClient(
+        receiveTokens,
+        "1212287206702583829",
+        "7plMXfI4PuvxMG-EVxZx7fyyJTZ1eH5i",
+        "http://localhost:205/auth/discord/callback",
+        205
+      );
+      auth._server.close();
+
+      const refreshToken = await auth.refreshToken(token);
+
+      if (refreshToken === null) {
+        isNotLogin();
+
+        childWindow?.once("ready-to-show", () => {
+          childWindow?.show();
+        });
+
+        return;
+      }
+
+      const userData = await auth.getIdentify(refreshToken.access_token);
+
+      if (userData == null) {
+        isNotLogin();
+        return;
+      }
+
+      await keytar.deletePassword("discord", "accessToken");
+      await keytar.deletePassword("discord", "refreshToken");
+
+      await keytar.setPassword(
+        "discord",
+        "accessToken",
+        refreshToken.access_token
+      );
+      await keytar.setPassword(
+        "discord",
+        "refreshToken",
+        refreshToken.refresh_token
+      );
+
+      new Notification({
+        title: "HEMIne Authentication",
+        body: "Discord에 로그인되었어요!",
+      }).show();
+
+      mainWindow?.webContents.send("login", userData);
+
+      return;
     }
   });
 }
 
-function receiveTokens(tokens: { accessToken: string; refreshToken: string }) {
-  console.log("Received tokens from auth.js:", tokens);
+function receiveTokens(
+  session: AuthClient,
+  tokens: { accessToken: string; refreshToken: string }
+) {
+  if (session.result) {
+    childWindow?.close();
+    childWindow = null;
+
+    session.getIdentify(tokens.accessToken).then(async (user) => {
+      if (user === null) {
+        loginFailed();
+        return;
+      }
+
+      await keytar.setPassword("discord", "userId", user.id);
+      await keytar.setPassword("discord", "accessToken", tokens.accessToken);
+      await keytar.setPassword("discord", "refreshToken", tokens.refreshToken);
+
+      new Notification({
+        title: "HEMIne Authentication",
+        body: "Discord 로그인에 성공했어요!",
+      }).show();
+
+      mainWindow?.webContents.send("login", user);
+
+      return;
+    });
+  } else {
+    loginFailed();
+    return;
+  }
+}
+
+function loginFailed() {
+  new Notification({
+    title: "HEMIne Authentication",
+    body: "Discord 로그인에 실패했어요! 다시 시도해주세요!",
+  }).show();
+
+  if (isDev) {
+    childWindow?.loadURL(BASE_URL + "#login");
+  } else {
+    childWindow?.loadURL(
+      url.format({
+        pathname: path.join(__dirname, "../build/index.html"),
+        protocol: "file:",
+        slashes: true,
+        hash: "/login",
+      })
+    );
+  }
+  return;
+}
+
+function isNotLogin() {
+  if (isDev) {
+    childWindow?.loadURL(BASE_URL + "#login");
+  } else {
+    childWindow?.loadURL(
+      url.format({
+        pathname: path.join(__dirname, "../build/index.html"),
+        protocol: "file:",
+        slashes: true,
+        hash: "/login",
+      })
+    );
+  }
+
+  new Notification({
+    title: "HEMIne Authentication",
+    body: "Discord에 로그인되지 않았어요! 로그인을 진행해주세요!",
+  }).show();
+
+  childWindow?.once("ready-to-show", () => {
+    childWindow?.show();
+  });
+
+  return;
 }
 
 ipc.on("minimizeApp", () => {
-  if (childWindow) {
-    childWindow?.minimize();
-    return;
-  }
   mainWindow?.minimize();
 });
 
 ipc.on("maximizeApp", () => {
-  if (childWindow) {
-    if (childWindow?.isMaximized()) {
-      childWindow?.restore();
-    } else {
-      childWindow?.maximize();
-    }
-    return;
-  }
   if (mainWindow?.isMaximized()) {
     mainWindow?.restore();
   } else {
@@ -116,13 +215,7 @@ ipc.on("maximizeApp", () => {
 });
 
 ipc.on("closeApp", () => {
-  if (childWindow) {
-    childWindow?.close();
-    childWindow = null;
-    return;
-  }
   mainWindow?.close();
-  mainWindow = null;
 });
 
 ipc.on("login", () => {
@@ -137,6 +230,8 @@ ipc.on("login", () => {
       205
     );
     childWindow.loadURL(auth.getAuthURL());
+  } else {
+    return;
   }
 });
 
