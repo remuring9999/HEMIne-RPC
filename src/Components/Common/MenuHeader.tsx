@@ -1,4 +1,5 @@
-import MenuTitle from "../../Elements/Common/MenuTitle";
+import MenuTitle from "../Elements/Common/MenuTitle";
+
 function MenuHeader() {
   return (
     <nav className="nav__header">

@@ -1,19 +1,21 @@
-import MenuHeader from "../Components/Common/MenuHeader";
-import Artwork from "../Elements/Main/Artwork";
-import SongInfo from "../Components/Main/SongInfo";
-import Player from "../Components/PlayerInterface/Player";
-import Library from "../Layouts/Library";
-import songData from "../Data/SongData";
 import { useState } from "react";
-import "../Styles/Home.scss";
+
+import MenuHeader from "../Components/Common/MenuHeader";
+import Artwork from "../Components/Elements/Main/Artwork";
+import SongInfo from "../Components/Main/SongInfo";
+import Player from "../Components/Layouts/Player";
+import Library from "../Components/Layouts/Library";
 import TitleBar from "src/Components/Main/TitleBar";
+
+import songData from "../Data/SongData";
+import "../Styles/Home.scss";
 
 function Home() {
   let userDarkModeApplied = window.matchMedia(
     "(prefers-color-scheme: dark)"
   ).matches;
 
-  const [uiState, setUiState] = useState({
+  const [uiState, setUiState] = useState<UiState>({
     aboutShown: false,
     libraryShown: false,
     libraryPinned: false,
@@ -23,7 +25,7 @@ function Home() {
     seekWidth: 0,
   });
 
-  const [songState, setSongState] = useState({
+  const [songState, setSongState] = useState<SongState>({
     currentSong: [songData[0]],
     isPlaying: false,
     elapsed: 0,
@@ -50,7 +52,6 @@ function Home() {
       <Artwork uiState={uiState} songState={songState} />
       <SongInfo songState={songState} />
       <Player
-        seekWidth={uiState.seekWidth}
         uiState={uiState}
         setUiState={setUiState}
         songState={songState}
@@ -60,7 +61,6 @@ function Home() {
         uiState={uiState}
         setUiState={setUiState}
         songState={songState}
-        setSongState={setSongState}
         songData={songData}
       />
     </div>

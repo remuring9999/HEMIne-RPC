@@ -20,7 +20,8 @@
     "baseUrl": ".",
     "paths": {
       "public/*": ["./public/*"]
-    }
+    },
+    "typeRoots": ["src/types"]
   },
-  "include": ["src", "public"]
+  "include": ["src", "public", "types"]
 }

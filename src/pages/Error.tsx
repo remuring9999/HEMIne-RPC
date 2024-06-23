@@ -1,14 +1,6 @@
 import Starfield from "react-starfield";
 import css from "../Styles/css/error.module.css";
 
-declare global {
-  interface Window {
-    electron: {
-      ipcSend: (channel: string, data?: any) => void;
-    };
-  }
-}
-
 function Login() {
   const handleClose = () => {
     window.electron.ipcSend("closeApp");
