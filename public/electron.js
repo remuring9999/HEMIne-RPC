@@ -47,10 +47,20 @@ var ipc = electron_1.ipcMain;
 var mainWindow;
 var childWindow;
 var connectionWindow;
+var loadingWindow;
 var connectionWindowEnabled = false;
 function createMainWindow() {
     var _this = this;
+    loadingWindow = new electron_1.BrowserWindow({
+        width: 400,
+        height: 300,
+        frame: false,
+        transparent: true,
+        alwaysOnTop: true,
+    });
+    loadingWindow.loadFile(path.join(__dirname, "preload.html"));
     mainWindow = new electron_1.BrowserWindow({
+        show: false,
         width: 470,
         height: 750,
         center: true,
@@ -62,6 +72,12 @@ function createMainWindow() {
             preload: path.join(__dirname, "preload.js"),
         },
     });
+    if (isDev) {
+        mainWindow.loadURL(BASE_URL);
+    }
+    else {
+        mainWindow.loadFile(path.join(__dirname, "../build/index.html"));
+    }
     childWindow = new electron_1.BrowserWindow({
         parent: mainWindow,
         show: false,
@@ -93,6 +109,7 @@ function createMainWindow() {
         },
     });
     mainWindow.once("ready-to-show", function () {
+        loadingWindow === null || loadingWindow === void 0 ? void 0 : loadingWindow.close();
         mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.show();
     });
     mainWindow.on("closed", function () {
@@ -100,12 +117,6 @@ function createMainWindow() {
     });
     if (process.platform == "win32") {
         electron_1.app.setAppUserModelId("HEMIne");
-    }
-    if (isDev) {
-        mainWindow.loadURL(BASE_URL);
-    }
-    else {
-        mainWindow.loadFile(path.join(__dirname, "../build/index.html"));
     }
     keytar.findCredentials("discord").then(function (credentials) { return __awaiter(_this, void 0, void 0, function () {
         var token, auth, refreshToken, userData;

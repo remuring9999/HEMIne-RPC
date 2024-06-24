@@ -15,6 +15,7 @@ let connectionWindowEnabled = false;
 
 function createMainWindow(): void {
   mainWindow = new BrowserWindow({
+    show: false,
     width: 470,
     height: 750,
     center: true,
@@ -26,6 +27,12 @@ function createMainWindow(): void {
       preload: path.join(__dirname, "preload.js"),
     },
   });
+
+  if (isDev) {
+    mainWindow.loadURL(BASE_URL);
+  } else {
+    mainWindow.loadFile(path.join(__dirname, "../build/index.html"));
+  }
 
   childWindow = new BrowserWindow({
     parent: mainWindow,
@@ -69,12 +76,6 @@ function createMainWindow(): void {
 
   if (process.platform == "win32") {
     app.setAppUserModelId("HEMIne");
-  }
-
-  if (isDev) {
-    mainWindow.loadURL(BASE_URL);
-  } else {
-    mainWindow.loadFile(path.join(__dirname, "../build/index.html"));
   }
 
   keytar.findCredentials("discord").then(async (credentials) => {
