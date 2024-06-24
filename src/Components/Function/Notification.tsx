@@ -22,6 +22,11 @@ export default async function Fire(darkmode: boolean) {
     hideClass: {
       popup: "animate__animated animate__fadeOutDown",
     },
+    didOpen: (toast) => {
+      toast.addEventListener("click", () => {
+        Conponent.close();
+      });
+    },
   });
 
   return Toast;
