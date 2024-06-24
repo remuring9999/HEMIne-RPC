@@ -47,18 +47,23 @@ var ipc = electron_1.ipcMain;
 var mainWindow;
 var childWindow;
 var connectionWindow;
-var loadingWindow;
+var initializeWindow;
 var connectionWindowEnabled = false;
 function createMainWindow() {
-    var _this = this;
-    loadingWindow = new electron_1.BrowserWindow({
+    initializeWindow = new electron_1.BrowserWindow({
         width: 400,
         height: 300,
         frame: false,
         transparent: true,
         alwaysOnTop: true,
+        resizable: false,
+        modal: true,
+        parent: mainWindow,
     });
-    loadingWindow.loadFile(path.join(__dirname, "preload.html"));
+    initializeWindow.loadFile(path.join(__dirname, "initialize.html"));
+    initializeWindow.on("closed", function () {
+        initializeWindow = null;
+    });
     mainWindow = new electron_1.BrowserWindow({
         show: false,
         width: 470,
@@ -66,6 +71,7 @@ function createMainWindow() {
         center: true,
         frame: false,
         resizable: false,
+        alwaysOnTop: true,
         webPreferences: {
             contextIsolation: true,
             nodeIntegration: true,
@@ -109,8 +115,14 @@ function createMainWindow() {
         },
     });
     mainWindow.once("ready-to-show", function () {
-        loadingWindow === null || loadingWindow === void 0 ? void 0 : loadingWindow.close();
+        if (initializeWindow) {
+            initializeWindow.close();
+        }
         mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.show();
+        login();
+        setTimeout(function () {
+            mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.setAlwaysOnTop(false);
+        }, 3000);
     });
     mainWindow.on("closed", function () {
         mainWindow = null;
@@ -118,61 +130,6 @@ function createMainWindow() {
     if (process.platform == "win32") {
         electron_1.app.setAppUserModelId("HEMIne");
     }
-    keytar.findCredentials("discord").then(function (credentials) { return __awaiter(_this, void 0, void 0, function () {
-        var token, auth, refreshToken, userData;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    if (!(credentials.length === 0)) return [3 /*break*/, 1];
-                    isNotLogin();
-                    childWindow === null || childWindow === void 0 ? void 0 : childWindow.once("ready-to-show", function () {
-                        childWindow === null || childWindow === void 0 ? void 0 : childWindow.show();
-                    });
-                    return [3 /*break*/, 9];
-                case 1: return [4 /*yield*/, keytar.getPassword("discord", "refreshToken")];
-                case 2:
-                    token = _a.sent();
-                    auth = new Auth_1.AuthClient(receiveTokens, "1212287206702583829", "7plMXfI4PuvxMG-EVxZx7fyyJTZ1eH5i", "http://localhost:205/auth/discord/callback", 205);
-                    auth._server.close();
-                    return [4 /*yield*/, auth.refreshToken(token)];
-                case 3:
-                    refreshToken = _a.sent();
-                    if (refreshToken === null) {
-                        isNotLogin();
-                        childWindow === null || childWindow === void 0 ? void 0 : childWindow.once("ready-to-show", function () {
-                            childWindow === null || childWindow === void 0 ? void 0 : childWindow.show();
-                        });
-                        return [2 /*return*/];
-                    }
-                    return [4 /*yield*/, auth.getIdentify(refreshToken.access_token)];
-                case 4:
-                    userData = _a.sent();
-                    if (userData == null) {
-                        isNotLogin();
-                        return [2 /*return*/];
-                    }
-                    return [4 /*yield*/, keytar.deletePassword("discord", "accessToken")];
-                case 5:
-                    _a.sent();
-                    return [4 /*yield*/, keytar.deletePassword("discord", "refreshToken")];
-                case 6:
-                    _a.sent();
-                    return [4 /*yield*/, keytar.setPassword("discord", "accessToken", refreshToken.access_token)];
-                case 7:
-                    _a.sent();
-                    return [4 /*yield*/, keytar.setPassword("discord", "refreshToken", refreshToken.refresh_token)];
-                case 8:
-                    _a.sent();
-                    new electron_1.Notification({
-                        title: "HEMIne Authentication",
-                        body: "Discord에 로그인되었어요!",
-                    }).show();
-                    mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("login", userData);
-                    return [2 /*return*/];
-                case 9: return [2 /*return*/];
-            }
-        });
-    }); });
 }
 function receiveTokens(session, tokens) {
     var _this = this;
@@ -250,6 +207,64 @@ function isNotLogin() {
     });
     return;
 }
+function login() {
+    var _this = this;
+    keytar.findCredentials("discord").then(function (credentials) { return __awaiter(_this, void 0, void 0, function () {
+        var token, auth, refreshToken, userData;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    if (!(credentials.length === 0)) return [3 /*break*/, 1];
+                    isNotLogin();
+                    childWindow === null || childWindow === void 0 ? void 0 : childWindow.once("ready-to-show", function () {
+                        childWindow === null || childWindow === void 0 ? void 0 : childWindow.show();
+                    });
+                    return [3 /*break*/, 9];
+                case 1: return [4 /*yield*/, keytar.getPassword("discord", "refreshToken")];
+                case 2:
+                    token = _a.sent();
+                    auth = new Auth_1.AuthClient(receiveTokens, "1212287206702583829", "7plMXfI4PuvxMG-EVxZx7fyyJTZ1eH5i", "http://localhost:205/auth/discord/callback", 205);
+                    auth._server.close();
+                    return [4 /*yield*/, auth.refreshToken(token)];
+                case 3:
+                    refreshToken = _a.sent();
+                    if (refreshToken === null) {
+                        isNotLogin();
+                        childWindow === null || childWindow === void 0 ? void 0 : childWindow.once("ready-to-show", function () {
+                            childWindow === null || childWindow === void 0 ? void 0 : childWindow.show();
+                        });
+                        return [2 /*return*/];
+                    }
+                    return [4 /*yield*/, auth.getIdentify(refreshToken.access_token)];
+                case 4:
+                    userData = _a.sent();
+                    if (userData == null) {
+                        isNotLogin();
+                        return [2 /*return*/];
+                    }
+                    return [4 /*yield*/, keytar.deletePassword("discord", "accessToken")];
+                case 5:
+                    _a.sent();
+                    return [4 /*yield*/, keytar.deletePassword("discord", "refreshToken")];
+                case 6:
+                    _a.sent();
+                    return [4 /*yield*/, keytar.setPassword("discord", "accessToken", refreshToken.access_token)];
+                case 7:
+                    _a.sent();
+                    return [4 /*yield*/, keytar.setPassword("discord", "refreshToken", refreshToken.refresh_token)];
+                case 8:
+                    _a.sent();
+                    new electron_1.Notification({
+                        title: "HEMIne Authentication",
+                        body: "Discord에 로그인되었어요!",
+                    }).show();
+                    mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("login", userData);
+                    return [2 /*return*/];
+                case 9: return [2 /*return*/];
+            }
+        });
+    }); });
+}
 ipc.on("minimizeApp", function () {
     mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.minimize();
 });
@@ -275,7 +290,7 @@ ipc.on("login", function () {
         return;
     }
 });
-ipc.on("openConnection", function (_event, user) {
+ipc.on("openConnection", function () {
     if (connectionWindowEnabled) {
         connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.show();
         return;
@@ -293,7 +308,6 @@ ipc.on("openConnection", function (_event, user) {
     }
     connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.once("ready-to-show", function () {
         connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.show();
-        connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("userData", user);
         connectionWindowEnabled = true;
     });
 });

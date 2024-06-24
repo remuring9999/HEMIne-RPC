@@ -11,9 +11,27 @@ const ipc = ipcMain;
 let mainWindow: BrowserWindow | null;
 let childWindow: BrowserWindow | null;
 let connectionWindow: BrowserWindow | null;
+let initializeWindow: BrowserWindow | null;
 let connectionWindowEnabled = false;
 
 function createMainWindow(): void {
+  initializeWindow = new BrowserWindow({
+    width: 400,
+    height: 300,
+    frame: false,
+    transparent: true,
+    alwaysOnTop: true,
+    resizable: false,
+    modal: true,
+    parent: mainWindow as BrowserWindow,
+  });
+
+  initializeWindow.loadFile(path.join(__dirname, "initialize.html"));
+
+  initializeWindow.on("closed", () => {
+    initializeWindow = null;
+  });
+
   mainWindow = new BrowserWindow({
     show: false,
     width: 470,
@@ -21,6 +39,7 @@ function createMainWindow(): void {
     center: true,
     frame: false,
     resizable: false,
+    alwaysOnTop: true,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: true,
@@ -67,7 +86,14 @@ function createMainWindow(): void {
   });
 
   mainWindow.once("ready-to-show", () => {
+    if (initializeWindow) {
+      initializeWindow.close();
+    }
     mainWindow?.show();
+    login();
+    setTimeout(() => {
+      mainWindow?.setAlwaysOnTop(false);
+    }, 3000);
   });
 
   mainWindow.on("closed", (): void => {
@@ -77,68 +103,6 @@ function createMainWindow(): void {
   if (process.platform == "win32") {
     app.setAppUserModelId("HEMIne");
   }
-
-  keytar.findCredentials("discord").then(async (credentials) => {
-    if (credentials.length === 0) {
-      isNotLogin();
-      childWindow?.once("ready-to-show", () => {
-        childWindow?.show();
-      });
-    } else {
-      const token = await keytar.getPassword("discord", "refreshToken");
-
-      const auth = new AuthClient(
-        receiveTokens,
-        "1212287206702583829",
-        "7plMXfI4PuvxMG-EVxZx7fyyJTZ1eH5i",
-        "http://localhost:205/auth/discord/callback",
-        205
-      );
-      auth._server.close();
-
-      const refreshToken = await auth.refreshToken(token);
-
-      if (refreshToken === null) {
-        isNotLogin();
-
-        childWindow?.once("ready-to-show", () => {
-          childWindow?.show();
-        });
-
-        return;
-      }
-
-      const userData = await auth.getIdentify(refreshToken.access_token);
-
-      if (userData == null) {
-        isNotLogin();
-        return;
-      }
-
-      await keytar.deletePassword("discord", "accessToken");
-      await keytar.deletePassword("discord", "refreshToken");
-
-      await keytar.setPassword(
-        "discord",
-        "accessToken",
-        refreshToken.access_token
-      );
-      await keytar.setPassword(
-        "discord",
-        "refreshToken",
-        refreshToken.refresh_token
-      );
-
-      new Notification({
-        title: "HEMIne Authentication",
-        body: "Discord에 로그인되었어요!",
-      }).show();
-
-      mainWindow?.webContents.send("login", userData);
-
-      return;
-    }
-  });
 }
 
 function receiveTokens(
@@ -221,6 +185,70 @@ function isNotLogin() {
   return;
 }
 
+function login() {
+  keytar.findCredentials("discord").then(async (credentials) => {
+    if (credentials.length === 0) {
+      isNotLogin();
+      childWindow?.once("ready-to-show", () => {
+        childWindow?.show();
+      });
+    } else {
+      const token = await keytar.getPassword("discord", "refreshToken");
+
+      const auth = new AuthClient(
+        receiveTokens,
+        "1212287206702583829",
+        "7plMXfI4PuvxMG-EVxZx7fyyJTZ1eH5i",
+        "http://localhost:205/auth/discord/callback",
+        205
+      );
+      auth._server.close();
+
+      const refreshToken = await auth.refreshToken(token);
+
+      if (refreshToken === null) {
+        isNotLogin();
+
+        childWindow?.once("ready-to-show", () => {
+          childWindow?.show();
+        });
+
+        return;
+      }
+
+      const userData = await auth.getIdentify(refreshToken.access_token);
+
+      if (userData == null) {
+        isNotLogin();
+        return;
+      }
+
+      await keytar.deletePassword("discord", "accessToken");
+      await keytar.deletePassword("discord", "refreshToken");
+
+      await keytar.setPassword(
+        "discord",
+        "accessToken",
+        refreshToken.access_token
+      );
+      await keytar.setPassword(
+        "discord",
+        "refreshToken",
+        refreshToken.refresh_token
+      );
+
+      new Notification({
+        title: "HEMIne Authentication",
+        body: "Discord에 로그인되었어요!",
+      }).show();
+
+      mainWindow?.webContents.send("login", userData);
+
+      return;
+    }
+  });
+}
+
 ipc.on("minimizeApp", () => {
   mainWindow?.minimize();
 });
@@ -254,7 +282,7 @@ ipc.on("login", () => {
   }
 });
 
-ipc.on("openConnection", (_event, user) => {
+ipc.on("openConnection", () => {
   if (connectionWindowEnabled) {
     connectionWindow?.show();
     return;
@@ -274,7 +302,6 @@ ipc.on("openConnection", (_event, user) => {
 
   connectionWindow?.once("ready-to-show", () => {
     connectionWindow?.show();
-    connectionWindow?.webContents.send("userData", user);
     connectionWindowEnabled = true;
   });
 });
