@@ -36,7 +36,11 @@ function Connection() {
         <div className={css.nickname}>{user?.global_name}</div>
         <div className={css.badgesContain}>
           {convertBadges(user?.flags as number).map((badge: FlagObject) => (
-            <img src={`/assets/DiscordBadges/${badge.data.origin}.svg`}></img>
+            <img
+              alt="badge"
+              src={`/assets/DiscordBadges/${badge.data.origin}.svg`}
+              title={badge.data.name}
+            ></img>
           ))}
         </div>
         <div className={css.userInfoContain}>
