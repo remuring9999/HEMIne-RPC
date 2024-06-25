@@ -50,20 +50,20 @@ var connectionWindow;
 var initializeWindow;
 var connectionWindowEnabled = false;
 function createMainWindow() {
-    initializeWindow = new electron_1.BrowserWindow({
-        width: 400,
-        height: 300,
-        frame: false,
-        transparent: true,
-        alwaysOnTop: true,
-        resizable: false,
-        modal: true,
-        parent: mainWindow,
-    });
-    initializeWindow.loadFile(path.join(__dirname, "initialize.html"));
-    initializeWindow.on("closed", function () {
-        initializeWindow = null;
-    });
+    // initializeWindow = new BrowserWindow({
+    //   width: 400,
+    //   height: 300,
+    //   frame: false,
+    //   transparent: true,
+    //   alwaysOnTop: true,
+    //   resizable: false,
+    //   modal: true,
+    //   parent: mainWindow as BrowserWindow,
+    // });
+    // initializeWindow.loadFile(path.join(__dirname, "initialize.html"));
+    // initializeWindow.on("closed", () => {
+    //   initializeWindow = null;
+    // });
     mainWindow = new electron_1.BrowserWindow({
         show: false,
         width: 470,

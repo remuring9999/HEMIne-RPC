@@ -37,9 +37,9 @@ function Connection() {
         <div className={css.badgesContain}>
           {convertBadges(user?.flags as number).map((badge: FlagObject) => (
             <img
-              alt="badge"
+              alt={badge.data.name}
+              id="badge"
               src={`/assets/DiscordBadges/${badge.data.origin}.svg`}
-              title={badge.data.name}
             ></img>
           ))}
         </div>
@@ -58,7 +58,7 @@ function Connection() {
               <p>{user?.email}</p>
             </li>
             <li>
-              <h3>MFA 활성화</h3>
+              <h3>MFA 인증</h3>
               <p>{user?.mfa_enabled ? "활성화" : "비활성화"}</p>
             </li>
           </ul>

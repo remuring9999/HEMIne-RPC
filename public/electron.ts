@@ -15,23 +15,6 @@ let initializeWindow: BrowserWindow | null;
 let connectionWindowEnabled = false;
 
 function createMainWindow(): void {
-  initializeWindow = new BrowserWindow({
-    width: 400,
-    height: 300,
-    frame: false,
-    transparent: true,
-    alwaysOnTop: true,
-    resizable: false,
-    modal: true,
-    parent: mainWindow as BrowserWindow,
-  });
-
-  initializeWindow.loadFile(path.join(__dirname, "initialize.html"));
-
-  initializeWindow.on("closed", () => {
-    initializeWindow = null;
-  });
-
   mainWindow = new BrowserWindow({
     show: false,
     width: 470,
