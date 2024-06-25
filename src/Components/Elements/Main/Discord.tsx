@@ -2,10 +2,11 @@ import { useState } from "react";
 import { FaDiscord } from "react-icons/fa";
 import css from "../../../Styles/css/discord.module.css";
 
-function Discord({ rpcConnected = false }: { rpcConnected: boolean }) {
+function Discord() {
   const [isHovered, setIsHovered] = useState(false);
+  const rpcConnected = true;
   const message = rpcConnected
-    ? "Discord에 연결되어있다네"
+    ? "Discord에 연결되었다네"
     : "Discord에 연결중이라네..";
 
   return (

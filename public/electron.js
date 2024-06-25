@@ -41,6 +41,7 @@ var electron_1 = require("electron");
 var isDev = require("electron-is-dev");
 var keytar = require("keytar");
 var url = require("url");
+var discord_rpc_1 = require("discord-rpc");
 var Auth_1 = require("./Auth");
 var BASE_URL = "http://localhost:3000";
 var ipc = electron_1.ipcMain;
@@ -293,6 +294,22 @@ ipc.on("openConnection", function () {
         connectionWindowEnabled = true;
     });
 });
+function ConnectRPC(accessToken) {
+    var RPC = new discord_rpc_1.Client({ transport: "websocket" });
+    RPC.on("ready", function () {
+        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("RPC_CONNECTED");
+        RPC.setActivity({
+            details: "ㅎㅇ",
+            state: "스테이트",
+            instance: false,
+        });
+    });
+    RPC.login({
+        clientId: "1212287206702583829",
+        scopes: ["rpc", "rpc.voice.read"],
+        accessToken: accessToken,
+    });
+}
 ipc.on("CloseConnection", function () {
     connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.hide();
 });

@@ -73,7 +73,7 @@ function Home() {
         songState={songState}
         songData={songData}
       />
-      <Discord rpcConnected={false} />
+      <Discord />
     </div>
   );
 }

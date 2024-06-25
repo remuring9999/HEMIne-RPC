@@ -3,6 +3,7 @@ import { app, BrowserWindow, Notification, ipcMain } from "electron";
 import * as isDev from "electron-is-dev";
 import * as keytar from "keytar";
 import * as url from "url";
+import { Client } from "discord-rpc";
 import { AuthClient } from "./Auth";
 
 const BASE_URL = "http://localhost:3000";
@@ -284,6 +285,25 @@ ipc.on("openConnection", () => {
     connectionWindowEnabled = true;
   });
 });
+
+function ConnectRPC(accessToken: string) {
+  const RPC = new Client({ transport: "websocket" });
+
+  RPC.on("ready", () => {
+    mainWindow?.webContents.send("RPC_CONNECTED");
+    RPC.setActivity({
+      details: "ㅎㅇ",
+      state: "스테이트",
+      instance: false,
+    });
+  });
+
+  RPC.login({
+    clientId: "1212287206702583829",
+    scopes: ["rpc", "rpc.voice.read"],
+    accessToken: accessToken,
+  });
+}
 
 ipc.on("CloseConnection", () => {
   connectionWindow?.hide();
