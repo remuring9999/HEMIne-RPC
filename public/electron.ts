@@ -11,7 +11,6 @@ const ipc = ipcMain;
 let mainWindow: BrowserWindow | null;
 let childWindow: BrowserWindow | null;
 let connectionWindow: BrowserWindow | null;
-let initializeWindow: BrowserWindow | null;
 let connectionWindowEnabled = false;
 
 function createMainWindow(): void {
@@ -69,14 +68,11 @@ function createMainWindow(): void {
   });
 
   mainWindow.once("ready-to-show", () => {
-    if (initializeWindow) {
-      initializeWindow.close();
-    }
     mainWindow?.show();
     login();
     setTimeout(() => {
       mainWindow?.setAlwaysOnTop(false);
-    }, 3000);
+    }, 1000);
   });
 
   mainWindow.on("closed", (): void => {
