@@ -7,7 +7,7 @@ function Login() {
   };
 
   const handleLogin = () => {
-    window.electron.ipcSend("login");
+    window.electron.ipcSend("loginDirect");
   };
 
   return (

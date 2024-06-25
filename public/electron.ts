@@ -108,7 +108,7 @@ function receiveTokens(
         body: "Discord 로그인에 성공했어요!",
       }).show();
 
-      mainWindow?.webContents.send("login", user);
+      mainWindow?.webContents.send("loginSuccess", user);
 
       return;
     });
@@ -222,7 +222,7 @@ function login() {
         body: "Discord에 로그인되었어요!",
       }).show();
 
-      mainWindow?.webContents.send("login", userData);
+      mainWindow?.webContents.send("loginSuccess", userData);
 
       return;
     }
@@ -245,7 +245,7 @@ ipc.on("closeApp", () => {
   mainWindow?.close();
 });
 
-ipc.on("login", () => {
+ipc.on("loginDirect", () => {
   if (childWindow) {
     childWindow.setSize(850, 950);
     childWindow.center();
@@ -286,24 +286,75 @@ ipc.on("openConnection", () => {
   });
 });
 
-function ConnectRPC(accessToken: string) {
-  const RPC = new Client({ transport: "websocket" });
+ipc.on("ConnectRPC", async (_event, data) => {
+  const accessToken = await keytar.getPassword("discord", "accessToken");
+  if (!accessToken) return isNotLogin();
 
-  RPC.on("ready", () => {
-    mainWindow?.webContents.send("RPC_CONNECTED");
+  const RPC = new Client({ transport: "ipc" });
+
+  RPC.on("ready", async () => {
     RPC.setActivity({
       details: "ㅎㅇ",
       state: "스테이트",
       instance: false,
     });
+
+    if (RPC.user?.id !== data.id) {
+      new Notification({
+        title: "HEMIne Authentication",
+        body: "올바르지 않은 Discord 계정입니다!",
+      }).show();
+
+      const Credentials = await keytar.findCredentials("discord");
+
+      for (const credential of Credentials) {
+        await keytar.deletePassword("discord", credential.account as string);
+      }
+
+      app.quit();
+      return;
+    }
   });
 
-  RPC.login({
-    clientId: "1212287206702583829",
-    scopes: ["rpc", "rpc.voice.read"],
-    accessToken: accessToken,
-  });
-}
+  let retryCount = 0;
+
+  const attemptLogin = async () => {
+    try {
+      await RPC.login({
+        clientId: "1212287206702583829",
+        scopes: ["rpc", "rpc.voice.read"],
+        accessToken: accessToken,
+      });
+
+      mainWindow?.webContents.send("ConnectedRPC");
+
+      new Notification({
+        title: "HEMIne",
+        body: "Discord Client에 연결되었어요!",
+      }).show();
+    } catch (error: any) {
+      if (retryCount < 5) {
+        retryCount++;
+        mainWindow?.webContents.send("ErrorConnectRPC", {
+          message: `Discord Client 연결에 실패했다네\n5초 후 다시 시도한다네\n시도 횟수 : ${retryCount}/5`,
+          error: error.message,
+        });
+        setTimeout(attemptLogin, 5000);
+      } else {
+        new Notification({
+          title: "HEMIne",
+          body: "Discord RPC 연결에 실패했어요!",
+        }).show();
+
+        app.quit();
+
+        return;
+      }
+    }
+  };
+
+  await attemptLogin();
+});
 
 ipc.on("CloseConnection", () => {
   connectionWindow?.hide();

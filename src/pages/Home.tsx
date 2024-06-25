@@ -33,7 +33,7 @@ function Home() {
     duration: 0,
   });
 
-  window.electron.ipcReceive("login", async (data) => {
+  window.electron.ipcReceive("loginSuccess", async (data) => {
     const alert = await Notification(userDarkModeApplied ? true : false);
     alert.fire({
       icon: "success",
@@ -42,6 +42,31 @@ function Home() {
       timerProgressBar: true,
     });
     localStorage.setItem("discordUser", JSON.stringify(data));
+    setTimeout(() => {
+      window.electron.ipcSend("ConnectRPC", data);
+    }, 5000);
+  });
+
+  window.electron.ipcReceive("ConnectedRPC", async () => {
+    const alert = await Notification(userDarkModeApplied ? true : false);
+    alert.fire({
+      icon: "success",
+      title: "Discord Client에 연결되었다네",
+      timer: 5000,
+      timerProgressBar: true,
+    });
+  });
+
+  window.electron.ipcReceive("ErrorConnectRPC", async (data) => {
+    const alert = await Notification(userDarkModeApplied ? true : false);
+    alert.fire({
+      icon: "error",
+      title: data.error,
+      text: data.message,
+      timer: 5000,
+      timerProgressBar: true,
+      position: "top-right",
+    });
   });
 
   document.body.style.backgroundImage = `url('${songState.currentSong[0].coverUrl}')`;

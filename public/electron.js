@@ -140,7 +140,7 @@ function receiveTokens(session, tokens) {
                             title: "HEMIne Authentication",
                             body: "Discord 로그인에 성공했어요!",
                         }).show();
-                        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("login", user);
+                        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("loginSuccess", user);
                         return [2 /*return*/];
                 }
             });
@@ -241,7 +241,7 @@ function login() {
                         title: "HEMIne Authentication",
                         body: "Discord에 로그인되었어요!",
                     }).show();
-                    mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("login", userData);
+                    mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("loginSuccess", userData);
                     return [2 /*return*/];
                 case 9: return [2 /*return*/];
             }
@@ -262,7 +262,7 @@ ipc.on("maximizeApp", function () {
 ipc.on("closeApp", function () {
     mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.close();
 });
-ipc.on("login", function () {
+ipc.on("loginDirect", function () {
     if (childWindow) {
         childWindow.setSize(850, 950);
         childWindow.center();
@@ -294,22 +294,104 @@ ipc.on("openConnection", function () {
         connectionWindowEnabled = true;
     });
 });
-function ConnectRPC(accessToken) {
-    var RPC = new discord_rpc_1.Client({ transport: "websocket" });
-    RPC.on("ready", function () {
-        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("RPC_CONNECTED");
-        RPC.setActivity({
-            details: "ㅎㅇ",
-            state: "스테이트",
-            instance: false,
-        });
+ipc.on("ConnectRPC", function (_event, data) { return __awaiter(void 0, void 0, void 0, function () {
+    var accessToken, RPC, retryCount, attemptLogin;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, keytar.getPassword("discord", "accessToken")];
+            case 1:
+                accessToken = _a.sent();
+                if (!accessToken)
+                    return [2 /*return*/, isNotLogin()];
+                RPC = new discord_rpc_1.Client({ transport: "ipc" });
+                RPC.on("ready", function () { return __awaiter(void 0, void 0, void 0, function () {
+                    var Credentials, _i, Credentials_1, credential;
+                    var _a;
+                    return __generator(this, function (_b) {
+                        switch (_b.label) {
+                            case 0:
+                                RPC.setActivity({
+                                    details: "ㅎㅇ",
+                                    state: "스테이트",
+                                    instance: false,
+                                });
+                                if (!(((_a = RPC.user) === null || _a === void 0 ? void 0 : _a.id) !== data.id)) return [3 /*break*/, 6];
+                                new electron_1.Notification({
+                                    title: "HEMIne Authentication",
+                                    body: "올바르지 않은 Discord 계정입니다!",
+                                }).show();
+                                return [4 /*yield*/, keytar.findCredentials("discord")];
+                            case 1:
+                                Credentials = _b.sent();
+                                _i = 0, Credentials_1 = Credentials;
+                                _b.label = 2;
+                            case 2:
+                                if (!(_i < Credentials_1.length)) return [3 /*break*/, 5];
+                                credential = Credentials_1[_i];
+                                return [4 /*yield*/, keytar.deletePassword("discord", credential.account)];
+                            case 3:
+                                _b.sent();
+                                _b.label = 4;
+                            case 4:
+                                _i++;
+                                return [3 /*break*/, 2];
+                            case 5:
+                                electron_1.app.quit();
+                                return [2 /*return*/];
+                            case 6: return [2 /*return*/];
+                        }
+                    });
+                }); });
+                retryCount = 0;
+                attemptLogin = function () { return __awaiter(void 0, void 0, void 0, function () {
+                    var error_1;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                _a.trys.push([0, 2, , 3]);
+                                return [4 /*yield*/, RPC.login({
+                                        clientId: "1212287206702583829",
+                                        scopes: ["rpc", "rpc.voice.read"],
+                                        accessToken: accessToken,
+                                    })];
+                            case 1:
+                                _a.sent();
+                                mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("ConnectedRPC");
+                                new electron_1.Notification({
+                                    title: "HEMIne Authentication",
+                                    body: "Discord Client에 연결되었어요!",
+                                }).show();
+                                return [3 /*break*/, 3];
+                            case 2:
+                                error_1 = _a.sent();
+                                if (retryCount < 5) {
+                                    retryCount++;
+                                    mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("ErrorConnectRPC", {
+                                        message: "Discord Client \uC5F0\uACB0\uC5D0 \uC2E4\uD328\uD588\uB2E4\uB124\n5\uCD08 \uD6C4 \uB2E4\uC2DC \uC2DC\uB3C4\uD55C\uB2E4\uB124\n\uC2DC\uB3C4 \uD69F\uC218 : ".concat(retryCount, "/5"),
+                                        error: error_1.message,
+                                    });
+                                    setTimeout(attemptLogin, 5000);
+                                }
+                                else {
+                                    new electron_1.Notification({
+                                        title: "HEMIne Authentication",
+                                        body: "Discord RPC 연결에 실패했어요!",
+                                    }).show();
+                                    electron_1.app.quit();
+                                    return [2 /*return*/];
+                                }
+                                return [3 /*break*/, 3];
+                            case 3: return [2 /*return*/];
+                        }
+                    });
+                }); };
+                return [4 /*yield*/, attemptLogin()];
+            case 2:
+                _a.sent();
+                return [2 /*return*/];
+        }
     });
-    RPC.login({
-        clientId: "1212287206702583829",
-        scopes: ["rpc", "rpc.voice.read"],
-        accessToken: accessToken,
-    });
-}
+}); });
 ipc.on("CloseConnection", function () {
     connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.hide();
 });

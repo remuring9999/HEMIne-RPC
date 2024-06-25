@@ -90,7 +90,6 @@ class AuthClient {
 
       return request.data;
     } catch (error) {
-      console.error(error);
       return null;
     }
   };
