@@ -1,5 +1,7 @@
+import { useContext, useEffect } from "react";
 import { convertBadges } from "../Utils/ConvertBadges";
 import css from "../Styles/css/connection.module.css";
+import { GlobalStateContext } from "../GlobalStateContext";
 
 function Connection() {
   const handleClose = () => {
@@ -8,6 +10,18 @@ function Connection() {
 
   const sotreData = localStorage.getItem("discordUser");
   const user = JSON.parse(sotreData as string);
+
+  const context = useContext(GlobalStateContext);
+
+  if (!context) {
+    throw new Error("ComponentB must be used within a GlobalStateProvider");
+  }
+
+  const { state, setState } = context;
+
+  useEffect(() => {
+    setState({ ...state });
+  }, []);
 
   return (
     <div className={css.app} onClick={handleClose}>
@@ -54,12 +68,14 @@ function Connection() {
               <p>{user?.username}</p>
             </li>
             <li>
-              <h3>이메일</h3>
-              <p>{user?.email}</p>
+              <h3>Discord Client 연결여부</h3>
+              <p>
+                {state.isRPCConnected ? "HEMIne RPC로 연결됨" : "연결 대기중"}
+              </p>
             </li>
             <li>
-              <h3>MFA 인증</h3>
-              <p>{user?.mfa_enabled ? "활성화" : "비활성화"}</p>
+              <h3>HEMIne</h3>
+              <p>비활성화</p>
             </li>
           </ul>
         </div>

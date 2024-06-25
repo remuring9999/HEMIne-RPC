@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 
 import MenuHeader from "../Components/Common/MenuHeader";
 import Artwork from "../Components/Elements/Main/Artwork";
@@ -9,6 +9,8 @@ import TitleBar from "../Components/Main/TitleBar";
 import Discord from "../Components/Elements/Main/Discord";
 import Notification from "../Components/Function/Notification";
 
+import { GlobalStateContext } from "../GlobalStateContext";
+
 import songData from "../Data/SongData";
 import "../Styles/Home.scss";
 
@@ -16,6 +18,13 @@ function Home() {
   let userDarkModeApplied = window.matchMedia(
     "(prefers-color-scheme: dark)"
   ).matches;
+
+  const context = useContext(GlobalStateContext);
+  if (!context)
+    throw new Error(
+      "You probably forgot to put <GlobalStateProvider> in your component tree."
+    );
+  const { state, setState } = context;
 
   const [uiState, setUiState] = useState<UiState>({
     libraryShown: false,
@@ -32,6 +41,8 @@ function Home() {
     elapsed: 0,
     duration: 0,
   });
+
+  const [rpcConnected, setRpcConnected] = useState<boolean>(false);
 
   window.electron.ipcReceive("loginSuccess", async (data) => {
     const alert = await Notification(userDarkModeApplied ? true : false);
@@ -55,6 +66,8 @@ function Home() {
       timer: 5000,
       timerProgressBar: true,
     });
+    setRpcConnected(true);
+    setState({ ...state, isRPCConnected: true });
   });
 
   window.electron.ipcReceive("ErrorConnectRPC", async (data) => {
@@ -98,7 +111,7 @@ function Home() {
         songState={songState}
         songData={songData}
       />
-      <Discord />
+      <Discord rpcConnected={rpcConnected} />
     </div>
   );
 }

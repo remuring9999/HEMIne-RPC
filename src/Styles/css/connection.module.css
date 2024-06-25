@@ -91,11 +91,14 @@
 .userInfoContain {
     width: 630px;
     height: 250px;
+    max-width: 630px;
+    max-height: 250px;
     background-color: #2B2D31;
     position: absolute;
     top: 190px;
     left: 15px;
     border-radius: 10px;
+
 }
 
 .userInfoContain li {

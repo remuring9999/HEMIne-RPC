@@ -358,7 +358,7 @@ ipc.on("ConnectRPC", function (_event, data) { return __awaiter(void 0, void 0, 
                                 _a.sent();
                                 mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("ConnectedRPC");
                                 new electron_1.Notification({
-                                    title: "HEMIne Authentication",
+                                    title: "HEMIne",
                                     body: "Discord Client에 연결되었어요!",
                                 }).show();
                                 return [3 /*break*/, 3];
@@ -374,7 +374,7 @@ ipc.on("ConnectRPC", function (_event, data) { return __awaiter(void 0, void 0, 
                                 }
                                 else {
                                     new electron_1.Notification({
-                                        title: "HEMIne Authentication",
+                                        title: "HEMIne",
                                         body: "Discord RPC 연결에 실패했어요!",
                                     }).show();
                                     electron_1.app.quit();
