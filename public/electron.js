@@ -49,6 +49,7 @@ var mainWindow;
 var childWindow;
 var connectionWindow;
 var connectionWindowEnabled = false;
+var RPCClient;
 function createMainWindow() {
     mainWindow = new electron_1.BrowserWindow({
         show: false,
@@ -311,7 +312,10 @@ ipc.on("ConnectRPC", function (_event, data) { return __awaiter(void 0, void 0, 
     var accessToken, RPC, retryCount, attemptLogin;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, keytar.getPassword("discord", "accessToken")];
+            case 0:
+                if (RPCClient)
+                    return [2 /*return*/];
+                return [4 /*yield*/, keytar.getPassword("discord", "accessToken")];
             case 1:
                 accessToken = _a.sent();
                 if (!accessToken)
@@ -319,9 +323,9 @@ ipc.on("ConnectRPC", function (_event, data) { return __awaiter(void 0, void 0, 
                 RPC = new discord_rpc_1.Client({ transport: "ipc" });
                 RPC.on("ready", function () { return __awaiter(void 0, void 0, void 0, function () {
                     var Credentials, _i, Credentials_1, credential;
-                    var _a;
-                    return __generator(this, function (_b) {
-                        switch (_b.label) {
+                    var _a, _b, _c;
+                    return __generator(this, function (_d) {
+                        switch (_d.label) {
                             case 0:
                                 RPC.setActivity({
                                     details: "ㅎㅇ",
@@ -329,29 +333,36 @@ ipc.on("ConnectRPC", function (_event, data) { return __awaiter(void 0, void 0, 
                                     instance: false,
                                 });
                                 if (!(((_a = RPC.user) === null || _a === void 0 ? void 0 : _a.id) !== data.id)) return [3 /*break*/, 6];
+                                if (((_b = RPC.user) === null || _b === void 0 ? void 0 : _b.id) == undefined || ((_c = RPC.user) === null || _c === void 0 ? void 0 : _c.id) == null)
+                                    return [2 /*return*/];
                                 new electron_1.Notification({
                                     title: "HEMIne Authentication",
                                     body: "올바르지 않은 Discord 계정입니다!",
                                 }).show();
                                 return [4 /*yield*/, keytar.findCredentials("discord")];
                             case 1:
-                                Credentials = _b.sent();
+                                Credentials = _d.sent();
                                 _i = 0, Credentials_1 = Credentials;
-                                _b.label = 2;
+                                _d.label = 2;
                             case 2:
                                 if (!(_i < Credentials_1.length)) return [3 /*break*/, 5];
                                 credential = Credentials_1[_i];
                                 return [4 /*yield*/, keytar.deletePassword("discord", credential.account)];
                             case 3:
-                                _b.sent();
-                                _b.label = 4;
+                                _d.sent();
+                                _d.label = 4;
                             case 4:
                                 _i++;
                                 return [3 /*break*/, 2];
                             case 5:
                                 electron_1.app.quit();
+                                _d.label = 6;
+                            case 6:
+                                new electron_1.Notification({
+                                    title: "HEMIne",
+                                    body: "Discord Client에 연결되었어요!",
+                                }).show();
                                 return [2 /*return*/];
-                            case 6: return [2 /*return*/];
                         }
                     });
                 }); });
@@ -371,10 +382,7 @@ ipc.on("ConnectRPC", function (_event, data) { return __awaiter(void 0, void 0, 
                                 _a.sent();
                                 mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("ConnectedRPC");
                                 connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("isRPCConnected", true);
-                                new electron_1.Notification({
-                                    title: "HEMIne",
-                                    body: "Discord Client에 연결되었어요!",
-                                }).show();
+                                RPCClient = RPC;
                                 return [3 /*break*/, 3];
                             case 2:
                                 error_1 = _a.sent();
@@ -404,6 +412,24 @@ ipc.on("ConnectRPC", function (_event, data) { return __awaiter(void 0, void 0, 
                 _a.sent();
                 return [2 /*return*/];
         }
+    });
+}); });
+/**
+ * @description Discord RPC 연결 해제
+ */
+ipc.on("RPC_Disconnect", function () { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        if (!RPCClient)
+            return [2 /*return*/];
+        RPCClient === null || RPCClient === void 0 ? void 0 : RPCClient.destroy();
+        RPCClient = null;
+        connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("isRPCConnected", false);
+        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("DisconnectedRPC");
+        new electron_1.Notification({
+            title: "HEMIne",
+            body: "Discord Client와 연결이 해제되었어요!",
+        }).show();
+        return [2 /*return*/];
     });
 }); });
 ipc.on("CloseConnection", function () {

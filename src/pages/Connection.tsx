@@ -15,6 +15,14 @@ function Connection() {
     setIsRPCConnected(data);
   });
 
+  const DisconnectRPC = () => {
+    window.electron.ipcSend("RPC_Disconnect");
+  };
+
+  const ConnectRPC = () => {
+    window.electron.ipcSend("ConnectRPC", user);
+  };
+
   return (
     <div className={css.app}>
       <div className={css.contain}>
@@ -89,11 +97,19 @@ function Connection() {
               <h3>Discord Client 연결여부</h3>
               <p>{isRPCConnected ? "HEMIne RPC로 연결됨" : "연결 대기중"}</p>
               {isRPCConnected ? (
-                <button className={css.DangerButton} style={{ top: "135px" }}>
+                <button
+                  className={css.DangerButton}
+                  style={{ top: "135px" }}
+                  onClick={DisconnectRPC}
+                >
                   RPC 연결 해제
                 </button>
               ) : (
-                <button className={css.PrimaryButton} style={{ top: "135px" }}>
+                <button
+                  className={css.PrimaryButton}
+                  style={{ top: "135px" }}
+                  onClick={ConnectRPC}
+                >
                   RPC 연결
                 </button>
               )}

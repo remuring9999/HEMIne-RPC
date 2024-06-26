@@ -13,6 +13,7 @@ let mainWindow: BrowserWindow | null;
 let childWindow: BrowserWindow | null;
 let connectionWindow: BrowserWindow | null;
 let connectionWindowEnabled = false;
+let RPCClient: Client | null;
 
 function createMainWindow(): void {
   mainWindow = new BrowserWindow({
@@ -300,6 +301,7 @@ ipc.on("openConnection", (_event, data) => {
  * @param {object} data Discord User Object
  */
 ipc.on("ConnectRPC", async (_event, data) => {
+  if (RPCClient) return;
   const accessToken = await keytar.getPassword("discord", "accessToken");
   if (!accessToken) return isNotLogin();
 
@@ -313,6 +315,7 @@ ipc.on("ConnectRPC", async (_event, data) => {
     });
 
     if (RPC.user?.id !== data.id) {
+      if (RPC.user?.id == undefined || RPC.user?.id == null) return;
       new Notification({
         title: "HEMIne Authentication",
         body: "올바르지 않은 Discord 계정입니다!",
@@ -325,8 +328,12 @@ ipc.on("ConnectRPC", async (_event, data) => {
       }
 
       app.quit();
-      return;
     }
+
+    new Notification({
+      title: "HEMIne",
+      body: "Discord Client에 연결되었어요!",
+    }).show();
   });
 
   let retryCount = 0;
@@ -342,10 +349,7 @@ ipc.on("ConnectRPC", async (_event, data) => {
       mainWindow?.webContents.send("ConnectedRPC");
       connectionWindow?.webContents.send("isRPCConnected", true);
 
-      new Notification({
-        title: "HEMIne",
-        body: "Discord Client에 연결되었어요!",
-      }).show();
+      RPCClient = RPC;
     } catch (error: any) {
       if (retryCount < 5) {
         retryCount++;
@@ -368,6 +372,22 @@ ipc.on("ConnectRPC", async (_event, data) => {
   };
 
   await attemptLogin();
+});
+
+/**
+ * @description Discord RPC 연결 해제
+ */
+ipc.on("RPC_Disconnect", async () => {
+  if (!RPCClient) return;
+  RPCClient?.destroy();
+  RPCClient = null;
+  connectionWindow?.webContents.send("isRPCConnected", false);
+  mainWindow?.webContents.send("DisconnectedRPC");
+  new Notification({
+    title: "HEMIne",
+    body: "Discord Client와 연결이 해제되었어요!",
+  }).show();
+  return;
 });
 
 ipc.on("CloseConnection", () => {

@@ -72,6 +72,10 @@ function Home() {
     });
   });
 
+  window.electron.ipcReceive("DisconnectedRPC", () => {
+    setRpcConnected(false);
+  });
+
   document.body.style.backgroundImage = `url('${songState.currentSong[0].coverUrl}')`;
   return (
     <div

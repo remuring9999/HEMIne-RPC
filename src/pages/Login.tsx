@@ -10,6 +10,8 @@ function Login() {
     window.electron.ipcSend("loginDirect");
   };
 
+  localStorage.removeItem("discordUser");
+
   return (
     <div className={css.loginContainer}>
       <button
