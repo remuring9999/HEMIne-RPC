@@ -4,6 +4,7 @@
     align-items: center;
     min-height: 100vh;
     margin: 0;
+
 }
 
 .contain {
@@ -125,4 +126,54 @@
     font-size: 16px;
     font-weight: 300;
     margin: 5px 10px;
+}
+
+.DangerButton {
+    width: 100px;
+    height: 30px;
+    background-color: #F04747;
+    border: none;
+    border-radius: 5px;
+    color: #FFFFFF;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    position: absolute;
+    top: 120px;
+    right: 16px;
+    font-family: AppleNeoM;
+}
+
+.PrimaryButton {
+    width: 100px;
+    height: 30px;
+    background-color: #5865F2;
+    border: none;
+    border-radius: 5px;
+    color: #FFFFFF;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    position: absolute;
+    top: 120px;
+    right: 16px;
+    font-family: AppleNeoM;
+}
+
+.PrimaryButton:hover {
+    background-color: #4752C4;
+}
+
+.DangerButton:hover {
+    background-color: #A12828;
+}
+
+.close {
+    -webkit-app-region: no-drag;
+    cursor: pointer;
+    top: 5px;
+    right: 5px;
+    position: fixed;
+    background-color: transparent;
+    border: none;
 }

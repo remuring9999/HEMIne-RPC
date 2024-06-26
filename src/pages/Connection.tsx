@@ -16,8 +16,33 @@ function Connection() {
   });
 
   return (
-    <div className={css.app} onClick={handleClose}>
+    <div className={css.app}>
       <div className={css.contain}>
+        <button id="close" className={css.close} onClick={handleClose}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+          >
+            <line
+              x1="6"
+              y1="6"
+              x2="18"
+              y2="18"
+              stroke="#36393F"
+              stroke-width="2"
+            />
+            <line
+              x1="6"
+              y1="18"
+              x2="18"
+              y2="6"
+              stroke="#36393F"
+              stroke-width="2"
+            />
+          </svg>
+        </button>
         <div
           className={css.banner}
           style={{
@@ -49,6 +74,7 @@ function Connection() {
             ></img>
           ))}
         </div>
+        <button className={css.DangerButton}>로그아웃</button>
         <div className={css.userInfoContain}>
           <ul>
             <li>
@@ -62,6 +88,15 @@ function Connection() {
             <li>
               <h3>Discord Client 연결여부</h3>
               <p>{isRPCConnected ? "HEMIne RPC로 연결됨" : "연결 대기중"}</p>
+              {isRPCConnected ? (
+                <button className={css.DangerButton} style={{ top: "135px" }}>
+                  RPC 연결 해제
+                </button>
+              ) : (
+                <button className={css.PrimaryButton} style={{ top: "135px" }}>
+                  RPC 연결
+                </button>
+              )}
             </li>
             <li>
               <h3>HEMIne</h3>
