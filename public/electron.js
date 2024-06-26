@@ -268,7 +268,7 @@ ipc.on("closeApp", function () {
  */
 ipc.on("loginDirect", function () {
     if (childWindow) {
-        childWindow.setSize(850, 950);
+        childWindow.setSize(1920, 950);
         childWindow.center();
         var auth = new Auth_1.AuthClient(receiveTokens, "1212287206702583829", "7plMXfI4PuvxMG-EVxZx7fyyJTZ1eH5i", "http://localhost:205/auth/discord/callback", 205);
         childWindow.loadURL(auth.getAuthURL());
@@ -399,7 +399,8 @@ ipc.on("ConnectRPC", function (_event, data) { return __awaiter(void 0, void 0, 
                                         title: "HEMIne",
                                         body: "Discord RPC 연결에 실패했어요!",
                                     }).show();
-                                    electron_1.app.quit();
+                                    electron_1.app.relaunch();
+                                    electron_1.app.exit();
                                     return [2 /*return*/];
                                 }
                                 return [3 /*break*/, 3];
@@ -430,6 +431,32 @@ ipc.on("RPC_Disconnect", function () { return __awaiter(void 0, void 0, void 0, 
             body: "Discord Client와 연결이 해제되었어요!",
         }).show();
         return [2 /*return*/];
+    });
+}); });
+ipc.on("logout", function () { return __awaiter(void 0, void 0, void 0, function () {
+    var Credentials, _i, Credentials_2, credential;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, keytar.findCredentials("discord")];
+            case 1:
+                Credentials = _a.sent();
+                _i = 0, Credentials_2 = Credentials;
+                _a.label = 2;
+            case 2:
+                if (!(_i < Credentials_2.length)) return [3 /*break*/, 5];
+                credential = Credentials_2[_i];
+                return [4 /*yield*/, keytar.deletePassword("discord", credential.account)];
+            case 3:
+                _a.sent();
+                _a.label = 4;
+            case 4:
+                _i++;
+                return [3 /*break*/, 2];
+            case 5:
+                electron_1.app.relaunch();
+                electron_1.app.exit();
+                return [2 /*return*/];
+        }
     });
 }); });
 ipc.on("CloseConnection", function () {

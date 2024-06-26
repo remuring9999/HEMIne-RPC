@@ -251,7 +251,7 @@ ipc.on("closeApp", () => {
  */
 ipc.on("loginDirect", () => {
   if (childWindow) {
-    childWindow.setSize(850, 950);
+    childWindow.setSize(1020, 950);
     childWindow.center();
     const auth = new AuthClient(
       receiveTokens,
@@ -364,7 +364,8 @@ ipc.on("ConnectRPC", async (_event, data) => {
           body: "Discord RPC 연결에 실패했어요!",
         }).show();
 
-        app.quit();
+        app.relaunch();
+        app.exit();
 
         return;
       }
@@ -388,6 +389,17 @@ ipc.on("RPC_Disconnect", async () => {
     body: "Discord Client와 연결이 해제되었어요!",
   }).show();
   return;
+});
+
+ipc.on("logout", async () => {
+  const Credentials = await keytar.findCredentials("discord");
+
+  for (const credential of Credentials) {
+    await keytar.deletePassword("discord", credential.account as string);
+  }
+
+  app.relaunch();
+  app.exit();
 });
 
 ipc.on("CloseConnection", () => {

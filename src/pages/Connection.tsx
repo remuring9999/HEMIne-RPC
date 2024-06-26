@@ -23,6 +23,10 @@ function Connection() {
     window.electron.ipcSend("ConnectRPC", user);
   };
 
+  const handleLogout = () => {
+    window.electron.ipcSend("logout");
+  };
+
   return (
     <div className={css.app}>
       <div className={css.contain}>
@@ -82,7 +86,9 @@ function Connection() {
             ></img>
           ))}
         </div>
-        <button className={css.DangerButton}>로그아웃</button>
+        <button className={css.DangerButton} onClick={handleLogout}>
+          로그아웃
+        </button>
         <div className={css.userInfoContain}>
           <ul>
             <li>
