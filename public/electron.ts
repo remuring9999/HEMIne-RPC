@@ -364,8 +364,7 @@ ipc.on("ConnectRPC", async (_event, data) => {
           body: "Discord RPC 연결에 실패했어요!",
         }).show();
 
-        app.relaunch();
-        app.exit();
+        app.quit();
 
         return;
       }
@@ -391,6 +390,9 @@ ipc.on("RPC_Disconnect", async () => {
   return;
 });
 
+/**
+ * @description 클라이언트 로그아웃
+ */
 ipc.on("logout", async () => {
   const Credentials = await keytar.findCredentials("discord");
 
@@ -398,8 +400,12 @@ ipc.on("logout", async () => {
     await keytar.deletePassword("discord", credential.account as string);
   }
 
-  app.relaunch();
-  app.exit();
+  new Notification({
+    title: "HEMIne Authentication",
+    body: "로그아웃되었어요! 앱을 재시작해주세요!",
+  }).show();
+
+  app.quit();
 });
 
 ipc.on("CloseConnection", () => {

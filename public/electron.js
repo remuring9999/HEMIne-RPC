@@ -268,7 +268,7 @@ ipc.on("closeApp", function () {
  */
 ipc.on("loginDirect", function () {
     if (childWindow) {
-        childWindow.setSize(1920, 950);
+        childWindow.setSize(1020, 950);
         childWindow.center();
         var auth = new Auth_1.AuthClient(receiveTokens, "1212287206702583829", "7plMXfI4PuvxMG-EVxZx7fyyJTZ1eH5i", "http://localhost:205/auth/discord/callback", 205);
         childWindow.loadURL(auth.getAuthURL());
@@ -399,8 +399,7 @@ ipc.on("ConnectRPC", function (_event, data) { return __awaiter(void 0, void 0, 
                                         title: "HEMIne",
                                         body: "Discord RPC 연결에 실패했어요!",
                                     }).show();
-                                    electron_1.app.relaunch();
-                                    electron_1.app.exit();
+                                    electron_1.app.quit();
                                     return [2 /*return*/];
                                 }
                                 return [3 /*break*/, 3];
@@ -433,6 +432,9 @@ ipc.on("RPC_Disconnect", function () { return __awaiter(void 0, void 0, void 0, 
         return [2 /*return*/];
     });
 }); });
+/**
+ * @description 클라이언트 로그아웃
+ */
 ipc.on("logout", function () { return __awaiter(void 0, void 0, void 0, function () {
     var Credentials, _i, Credentials_2, credential;
     return __generator(this, function (_a) {
@@ -453,8 +455,11 @@ ipc.on("logout", function () { return __awaiter(void 0, void 0, void 0, function
                 _i++;
                 return [3 /*break*/, 2];
             case 5:
-                electron_1.app.relaunch();
-                electron_1.app.exit();
+                new electron_1.Notification({
+                    title: "HEMIne Authentication",
+                    body: "로그아웃되었어요! 앱을 재시작해주세요!",
+                }).show();
+                electron_1.app.quit();
                 return [2 /*return*/];
         }
     });
