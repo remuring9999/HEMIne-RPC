@@ -262,6 +262,9 @@ ipc.on("maximizeApp", function () {
 ipc.on("closeApp", function () {
     mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.close();
 });
+/**
+ * @description Discord 로그인창열기
+ */
 ipc.on("loginDirect", function () {
     if (childWindow) {
         childWindow.setSize(850, 950);
@@ -273,8 +276,13 @@ ipc.on("loginDirect", function () {
         return;
     }
 });
-ipc.on("openConnection", function () {
+/**
+ * @description Discord 정보창열기
+ * @param {Boolean} data Discord RPC 연결여부
+ */
+ipc.on("openConnection", function (_event, data) {
     if (connectionWindowEnabled) {
+        connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("isRPCConnected", data);
         connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.show();
         return;
     }
@@ -292,8 +300,13 @@ ipc.on("openConnection", function () {
     connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.once("ready-to-show", function () {
         connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.show();
         connectionWindowEnabled = true;
+        connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("isRPCConnected", data);
     });
 });
+/**
+ * @description Discord RPC 연결
+ * @param {object} data Discord User Object
+ */
 ipc.on("ConnectRPC", function (_event, data) { return __awaiter(void 0, void 0, void 0, function () {
     var accessToken, RPC, retryCount, attemptLogin;
     return __generator(this, function (_a) {
@@ -357,6 +370,7 @@ ipc.on("ConnectRPC", function (_event, data) { return __awaiter(void 0, void 0, 
                             case 1:
                                 _a.sent();
                                 mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("ConnectedRPC");
+                                connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("isRPCConnected", true);
                                 new electron_1.Notification({
                                     title: "HEMIne",
                                     body: "Discord Client에 연결되었어요!",

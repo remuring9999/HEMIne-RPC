@@ -245,6 +245,9 @@ ipc.on("closeApp", () => {
   mainWindow?.close();
 });
 
+/**
+ * @description Discord 로그인창열기
+ */
 ipc.on("loginDirect", () => {
   if (childWindow) {
     childWindow.setSize(850, 950);
@@ -262,8 +265,13 @@ ipc.on("loginDirect", () => {
   }
 });
 
-ipc.on("openConnection", () => {
+/**
+ * @description Discord 정보창열기
+ * @param {Boolean} data Discord RPC 연결여부
+ */
+ipc.on("openConnection", (_event, data) => {
   if (connectionWindowEnabled) {
+    connectionWindow?.webContents.send("isRPCConnected", data);
     connectionWindow?.show();
     return;
   }
@@ -283,9 +291,14 @@ ipc.on("openConnection", () => {
   connectionWindow?.once("ready-to-show", () => {
     connectionWindow?.show();
     connectionWindowEnabled = true;
+    connectionWindow?.webContents.send("isRPCConnected", data);
   });
 });
 
+/**
+ * @description Discord RPC 연결
+ * @param {object} data Discord User Object
+ */
 ipc.on("ConnectRPC", async (_event, data) => {
   const accessToken = await keytar.getPassword("discord", "accessToken");
   if (!accessToken) return isNotLogin();
@@ -327,6 +340,7 @@ ipc.on("ConnectRPC", async (_event, data) => {
       });
 
       mainWindow?.webContents.send("ConnectedRPC");
+      connectionWindow?.webContents.send("isRPCConnected", true);
 
       new Notification({
         title: "HEMIne",

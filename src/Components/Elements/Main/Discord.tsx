@@ -13,7 +13,7 @@ function Discord({ rpcConnected }: { rpcConnected: boolean }) {
       className={css.contain}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={() => window.electron.ipcSend("openConnection")}
+      onClick={() => window.electron.ipcSend("openConnection", rpcConnected)}
     >
       <FaDiscord className={css.icon} />
       {isHovered && <div className={css.overText}>{message}</div>}
