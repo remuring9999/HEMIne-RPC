@@ -72,7 +72,14 @@ function Home() {
     });
   });
 
-  window.electron.ipcReceive("DisconnectedRPC", () => {
+  window.electron.ipcReceive("DisconnectedRPC", async () => {
+    const alert = await Notification(userDarkModeApplied ? true : false);
+    alert.fire({
+      icon: "error",
+      title: "Discord Client 연결이 해제되었다네",
+      timer: 5000,
+      timerProgressBar: true,
+    });
     setRpcConnected(false);
   });
 
