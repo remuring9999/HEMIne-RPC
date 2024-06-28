@@ -3,7 +3,7 @@ import { app, BrowserWindow, Notification, ipcMain } from "electron";
 import * as isDev from "electron-is-dev";
 import * as keytar from "keytar";
 import * as url from "url";
-import { Client } from "discord-rpc";
+import { Client } from "@remuring/discord-rpc";
 import { AuthClient } from "./Auth";
 
 const BASE_URL = "http://localhost:3000";
@@ -308,6 +308,7 @@ ipc.on("RPC_CONNECT", async (_event, data) => {
   const RPC = new Client({ transport: "ipc" });
 
   RPC.on("ready", async () => {
+    console.log(await RPC.getSelectedVoiceChannel()); // => TODO
     RPC.setActivity({
       details: "ㅎㅇ",
       state: "스테이트",
