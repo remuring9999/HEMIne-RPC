@@ -3,7 +3,7 @@ import css from "../Styles/css/error.module.css";
 
 function Login() {
   const handleClose = () => {
-    window.electron.ipcSend("closeApp");
+    window.electron.ipcSend("APP_CLOSE");
   };
 
   return (

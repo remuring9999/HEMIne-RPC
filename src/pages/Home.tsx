@@ -35,7 +35,7 @@ function Home() {
 
   const [rpcConnected, setRpcConnected] = useState<boolean>(false);
 
-  window.electron.ipcReceive("loginSuccess", async (data) => {
+  window.electron.ipcReceive("LOGIN_SUCCESS", async (data) => {
     const alert = await Notification(userDarkModeApplied ? true : false);
     alert.fire({
       icon: "success",
@@ -45,11 +45,11 @@ function Home() {
     });
     localStorage.setItem("discordUser", JSON.stringify(data));
     setTimeout(() => {
-      window.electron.ipcSend("ConnectRPC", data);
+      window.electron.ipcSend("RPC_CONNECT", data);
     }, 5000);
   });
 
-  window.electron.ipcReceive("ConnectedRPC", async () => {
+  window.electron.ipcReceive("RPC_CONNECT_SUCCESS", async () => {
     const alert = await Notification(userDarkModeApplied ? true : false);
     alert.fire({
       icon: "success",
@@ -60,7 +60,7 @@ function Home() {
     setRpcConnected(true);
   });
 
-  window.electron.ipcReceive("ErrorConnectRPC", async (data) => {
+  window.electron.ipcReceive("RPC_CONNECT_ERROR", async (data) => {
     const alert = await Notification(userDarkModeApplied ? true : false);
     alert.fire({
       icon: "error",
@@ -72,7 +72,7 @@ function Home() {
     });
   });
 
-  window.electron.ipcReceive("DisconnectedRPC", async () => {
+  window.electron.ipcReceive("RPC_DISCONNECTED", async () => {
     const alert = await Notification(userDarkModeApplied ? true : false);
     alert.fire({
       icon: "error",

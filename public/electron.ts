@@ -109,7 +109,7 @@ function receiveTokens(
         body: "Discord 로그인에 성공했어요!",
       }).show();
 
-      mainWindow?.webContents.send("loginSuccess", user);
+      mainWindow?.webContents.send("LOGIN_SUCCESS", user);
 
       return;
     });
@@ -223,18 +223,18 @@ function login() {
         body: "Discord에 로그인되었어요!",
       }).show();
 
-      mainWindow?.webContents.send("loginSuccess", userData);
+      mainWindow?.webContents.send("LOGIN_SUCCESS", userData);
 
       return;
     }
   });
 }
 
-ipc.on("minimizeApp", () => {
+ipc.on("APP_MINIMIZE", () => {
   mainWindow?.minimize();
 });
 
-ipc.on("maximizeApp", () => {
+ipc.on("APP_MAXIMIZE", () => {
   if (mainWindow?.isMaximized()) {
     mainWindow?.restore();
   } else {
@@ -242,14 +242,14 @@ ipc.on("maximizeApp", () => {
   }
 });
 
-ipc.on("closeApp", () => {
+ipc.on("APP_CLOSE", () => {
   mainWindow?.close();
 });
 
 /**
  * @description Discord 로그인창열기
  */
-ipc.on("loginDirect", () => {
+ipc.on("PAGE_LOGIN_OPEN", () => {
   if (childWindow) {
     childWindow.setSize(1020, 950);
     childWindow.center();
@@ -270,9 +270,9 @@ ipc.on("loginDirect", () => {
  * @description Discord 정보창열기
  * @param {Boolean} data Discord RPC 연결여부
  */
-ipc.on("openConnection", (_event, data) => {
+ipc.on("PAGE_CONNECTION_OPEN", (_event, data) => {
   if (connectionWindowEnabled) {
-    connectionWindow?.webContents.send("isRPCConnected", data);
+    connectionWindow?.webContents.send("RPC_IS_CONNECTED", data);
     connectionWindow?.show();
     return;
   }
@@ -292,7 +292,7 @@ ipc.on("openConnection", (_event, data) => {
   connectionWindow?.once("ready-to-show", () => {
     connectionWindow?.show();
     connectionWindowEnabled = true;
-    connectionWindow?.webContents.send("isRPCConnected", data);
+    connectionWindow?.webContents.send("RPC_IS_CONNECTED", data);
   });
 });
 
@@ -300,7 +300,7 @@ ipc.on("openConnection", (_event, data) => {
  * @description Discord RPC 연결
  * @param {object} data Discord User Object
  */
-ipc.on("ConnectRPC", async (_event, data) => {
+ipc.on("RPC_CONNECT", async (_event, data) => {
   if (RPCClient) return;
   const accessToken = await keytar.getPassword("discord", "accessToken");
   if (!accessToken) return isNotLogin();
@@ -346,14 +346,14 @@ ipc.on("ConnectRPC", async (_event, data) => {
         accessToken: accessToken,
       });
 
-      mainWindow?.webContents.send("ConnectedRPC");
-      connectionWindow?.webContents.send("isRPCConnected", true);
+      mainWindow?.webContents.send("RPC_CONNECT_SUCCESS");
+      connectionWindow?.webContents.send("RPC_IS_CONNECTED", true);
 
       RPCClient = RPC;
     } catch (error: any) {
       if (retryCount < 5) {
         retryCount++;
-        mainWindow?.webContents.send("ErrorConnectRPC", {
+        mainWindow?.webContents.send("RPC_CONNECT_ERROR", {
           message: `Discord Client 연결에 실패했다네\n5초 후 다시 시도한다네\n시도 횟수 : ${retryCount}/5`,
           error: error.message,
         });
@@ -377,12 +377,12 @@ ipc.on("ConnectRPC", async (_event, data) => {
 /**
  * @description Discord RPC 연결 해제
  */
-ipc.on("RPC_Disconnect", async () => {
+ipc.on("RPC_DISCONNECT", async () => {
   if (!RPCClient) return;
   RPCClient?.destroy();
   RPCClient = null;
-  connectionWindow?.webContents.send("isRPCConnected", false);
-  mainWindow?.webContents.send("DisconnectedRPC");
+  connectionWindow?.webContents.send("RPC_IS_CONNECTED", false);
+  mainWindow?.webContents.send("RPC_DISCONNECTED");
   new Notification({
     title: "HEMIne",
     body: "Discord Client와 연결이 해제되었어요!",
@@ -393,7 +393,7 @@ ipc.on("RPC_Disconnect", async () => {
 /**
  * @description 클라이언트 로그아웃
  */
-ipc.on("logout", async () => {
+ipc.on("APP_LOGOUT", async () => {
   const Credentials = await keytar.findCredentials("discord");
 
   for (const credential of Credentials) {
@@ -408,7 +408,7 @@ ipc.on("logout", async () => {
   app.quit();
 });
 
-ipc.on("CloseConnection", () => {
+ipc.on("PAGE_CONNECTION_CLOSE", () => {
   connectionWindow?.hide();
 });
 

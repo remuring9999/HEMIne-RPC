@@ -4,27 +4,27 @@ import css from "../Styles/css/connection.module.css";
 
 function Connection() {
   const handleClose = () => {
-    window.electron.ipcSend("CloseConnection");
+    window.electron.ipcSend("PAGE_CONNECTION_CLOSE");
   };
 
   const [isRPCConnected, setIsRPCConnected] = useState<boolean>(false);
   const sotreData = localStorage.getItem("discordUser");
   const user = JSON.parse(sotreData as string);
 
-  window.electron.ipcReceive("isRPCConnected", (data) => {
+  window.electron.ipcReceive("RPC_IS_CONNECTED", (data) => {
     setIsRPCConnected(data);
   });
 
   const DisconnectRPC = () => {
-    window.electron.ipcSend("RPC_Disconnect");
+    window.electron.ipcSend("RPC_DISCONNECT");
   };
 
   const ConnectRPC = () => {
-    window.electron.ipcSend("ConnectRPC", user);
+    window.electron.ipcSend("RPC_CONNECT", user);
   };
 
   const handleLogout = () => {
-    window.electron.ipcSend("logout");
+    window.electron.ipcSend("APP_LOGOUT");
   };
 
   return (
