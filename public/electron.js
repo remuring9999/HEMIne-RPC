@@ -141,7 +141,7 @@ function receiveTokens(session, tokens) {
                             title: "HEMIne Authentication",
                             body: "Discord 로그인에 성공했어요!",
                         }).show();
-                        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("loginSuccess", user);
+                        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("LOGIN_SUCCESS", user);
                         return [2 /*return*/];
                 }
             });
@@ -242,17 +242,17 @@ function login() {
                         title: "HEMIne Authentication",
                         body: "Discord에 로그인되었어요!",
                     }).show();
-                    mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("loginSuccess", userData);
+                    mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("LOGIN_SUCCESS", userData);
                     return [2 /*return*/];
                 case 9: return [2 /*return*/];
             }
         });
     }); });
 }
-ipc.on("minimizeApp", function () {
+ipc.on("APP_MINIMIZE", function () {
     mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.minimize();
 });
-ipc.on("maximizeApp", function () {
+ipc.on("APP_MAXIMIZE", function () {
     if (mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.isMaximized()) {
         mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.restore();
     }
@@ -260,13 +260,13 @@ ipc.on("maximizeApp", function () {
         mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.maximize();
     }
 });
-ipc.on("closeApp", function () {
+ipc.on("APP_CLOSE", function () {
     mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.close();
 });
 /**
  * @description Discord 로그인창열기
  */
-ipc.on("loginDirect", function () {
+ipc.on("PAGE_LOGIN_OPEN", function () {
     if (childWindow) {
         childWindow.setSize(1020, 950);
         childWindow.center();
@@ -281,9 +281,9 @@ ipc.on("loginDirect", function () {
  * @description Discord 정보창열기
  * @param {Boolean} data Discord RPC 연결여부
  */
-ipc.on("openConnection", function (_event, data) {
+ipc.on("PAGE_CONNECTION_OPEN", function (_event, data) {
     if (connectionWindowEnabled) {
-        connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("isRPCConnected", data);
+        connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("RPC_IS_CONNECTED", data);
         connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.show();
         return;
     }
@@ -301,14 +301,14 @@ ipc.on("openConnection", function (_event, data) {
     connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.once("ready-to-show", function () {
         connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.show();
         connectionWindowEnabled = true;
-        connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("isRPCConnected", data);
+        connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("RPC_IS_CONNECTED", data);
     });
 });
 /**
  * @description Discord RPC 연결
  * @param {object} data Discord User Object
  */
-ipc.on("ConnectRPC", function (_event, data) { return __awaiter(void 0, void 0, void 0, function () {
+ipc.on("RPC_CONNECT", function (_event, data) { return __awaiter(void 0, void 0, void 0, function () {
     var accessToken, RPC, retryCount, attemptLogin;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -380,15 +380,15 @@ ipc.on("ConnectRPC", function (_event, data) { return __awaiter(void 0, void 0, 
                                     })];
                             case 1:
                                 _a.sent();
-                                mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("ConnectedRPC");
-                                connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("isRPCConnected", true);
+                                mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("RPC_CONNECT_SUCCESS");
+                                connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("RPC_IS_CONNECTED", true);
                                 RPCClient = RPC;
                                 return [3 /*break*/, 3];
                             case 2:
                                 error_1 = _a.sent();
                                 if (retryCount < 5) {
                                     retryCount++;
-                                    mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("ErrorConnectRPC", {
+                                    mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("RPC_CONNECT_ERROR", {
                                         message: "Discord Client \uC5F0\uACB0\uC5D0 \uC2E4\uD328\uD588\uB2E4\uB124\n5\uCD08 \uD6C4 \uB2E4\uC2DC \uC2DC\uB3C4\uD55C\uB2E4\uB124\n\uC2DC\uB3C4 \uD69F\uC218 : ".concat(retryCount, "/5"),
                                         error: error_1.message,
                                     });
@@ -417,14 +417,14 @@ ipc.on("ConnectRPC", function (_event, data) { return __awaiter(void 0, void 0, 
 /**
  * @description Discord RPC 연결 해제
  */
-ipc.on("RPC_Disconnect", function () { return __awaiter(void 0, void 0, void 0, function () {
+ipc.on("RPC_DISCONNECT", function () { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         if (!RPCClient)
             return [2 /*return*/];
         RPCClient === null || RPCClient === void 0 ? void 0 : RPCClient.destroy();
         RPCClient = null;
-        connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("isRPCConnected", false);
-        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("DisconnectedRPC");
+        connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("RPC_IS_CONNECTED", false);
+        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("RPC_DISCONNECTED");
         new electron_1.Notification({
             title: "HEMIne",
             body: "Discord Client와 연결이 해제되었어요!",
@@ -435,7 +435,7 @@ ipc.on("RPC_Disconnect", function () { return __awaiter(void 0, void 0, void 0, 
 /**
  * @description 클라이언트 로그아웃
  */
-ipc.on("logout", function () { return __awaiter(void 0, void 0, void 0, function () {
+ipc.on("APP_LOGOUT", function () { return __awaiter(void 0, void 0, void 0, function () {
     var Credentials, _i, Credentials_2, credential;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -464,7 +464,7 @@ ipc.on("logout", function () { return __awaiter(void 0, void 0, void 0, function
         }
     });
 }); });
-ipc.on("CloseConnection", function () {
+ipc.on("PAGE_CONNECTION_CLOSE", function () {
     connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.hide();
 });
 electron_1.app.on("ready", function () {
