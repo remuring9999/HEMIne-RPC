@@ -37,21 +37,24 @@ function Home() {
 
   window.electron.ipcReceive("LOGIN_SUCCESS", async (data) => {
     const alert = await Notification(userDarkModeApplied ? true : false);
-    alert.fire({
+    await alert.fire({
       icon: "success",
       title: `반갑다네 ${data.username} !`,
       timer: 5000,
       timerProgressBar: true,
     });
     localStorage.setItem("discordUser", JSON.stringify(data));
-    setTimeout(() => {
+    await setTimeout(() => {
       window.electron.ipcSend("RPC_CONNECT", data);
-    }, 5000);
+    }, 1000);
+    await setTimeout(() => {
+      window.electron.ipcSend("WS_CONNECT", data);
+    }, 3000);
   });
 
   window.electron.ipcReceive("RPC_CONNECT_SUCCESS", async () => {
     const alert = await Notification(userDarkModeApplied ? true : false);
-    alert.fire({
+    await alert.fire({
       icon: "success",
       title: "Discord Client에 연결되었다네",
       timer: 5000,
@@ -62,7 +65,7 @@ function Home() {
 
   window.electron.ipcReceive("RPC_CONNECT_ERROR", async (data) => {
     const alert = await Notification(userDarkModeApplied ? true : false);
-    alert.fire({
+    await alert.fire({
       icon: "error",
       title: data.error,
       text: data.message,
@@ -74,13 +77,33 @@ function Home() {
 
   window.electron.ipcReceive("RPC_DISCONNECTED", async () => {
     const alert = await Notification(userDarkModeApplied ? true : false);
-    alert.fire({
+    await alert.fire({
       icon: "error",
       title: "Discord Client 연결이 해제되었다네",
       timer: 5000,
       timerProgressBar: true,
     });
     setRpcConnected(false);
+  });
+
+  window.electron.ipcReceive("WS_CONNECTED", async () => {
+    const alert = await Notification(userDarkModeApplied ? true : false);
+    await alert.fire({
+      icon: "success",
+      title: "HEMIne에 연결되었다네",
+      timer: 5000,
+      timerProgressBar: true,
+    });
+  });
+
+  window.electron.ipcReceive("WS_DISCONNECTED", async () => {
+    const alert = await Notification(userDarkModeApplied ? true : false);
+    await alert.fire({
+      icon: "error",
+      title: "HEMIne 연결이 해제되었다네",
+      timer: 5000,
+      timerProgressBar: true,
+    });
   });
 
   document.body.style.backgroundImage = `url('${songState.currentSong[0].coverUrl}')`;

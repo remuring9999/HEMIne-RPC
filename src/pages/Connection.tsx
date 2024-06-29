@@ -8,11 +8,16 @@ function Connection() {
   };
 
   const [isRPCConnected, setIsRPCConnected] = useState<boolean>(false);
+  const [isHEMIneConnected, setIsHEMIneConnected] = useState<boolean>(false);
   const sotreData = localStorage.getItem("discordUser");
   const user = JSON.parse(sotreData as string);
 
   window.electron.ipcReceive("RPC_IS_CONNECTED", (data) => {
     setIsRPCConnected(data);
+  });
+
+  window.electron.ipcReceive("WS_IS_CONNECTED", (data) => {
+    setIsHEMIneConnected(data);
   });
 
   const DisconnectRPC = () => {
@@ -26,6 +31,12 @@ function Connection() {
   const handleLogout = () => {
     window.electron.ipcSend("APP_LOGOUT");
   };
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "F5" || (e.ctrlKey && e.key === "r")) {
+      e.preventDefault();
+    }
+  });
 
   return (
     <div className={css.app}>
@@ -122,7 +133,7 @@ function Connection() {
             </li>
             <li>
               <h3>HEMIne</h3>
-              <p>비활성화</p>
+              <p>{isHEMIneConnected ? "활성화" : "비활성화"}</p>
             </li>
           </ul>
         </div>

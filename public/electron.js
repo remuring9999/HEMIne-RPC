@@ -43,6 +43,8 @@ var keytar = require("keytar");
 var url = require("url");
 var discord_rpc_1 = require("@remuring/discord-rpc");
 var Auth_1 = require("./Auth");
+var socket_io_client_1 = require("socket.io-client");
+var package_json_1 = require("../package.json");
 var BASE_URL = "http://localhost:3000";
 var ipc = electron_1.ipcMain;
 var mainWindow;
@@ -50,6 +52,7 @@ var childWindow;
 var connectionWindow;
 var connectionWindowEnabled = false;
 var RPCClient;
+var SocketClientId = null;
 function createMainWindow() {
     mainWindow = new electron_1.BrowserWindow({
         show: false,
@@ -115,6 +118,14 @@ function createMainWindow() {
         electron_1.app.setAppUserModelId("HEMIne");
     }
 }
+var socket = (0, socket_io_client_1.io)("http://localhost:5000", {
+    autoConnect: false,
+    transports: ["websocket"],
+    extraHeaders: {
+        Authorization: "".concat(Crypto(generateKey())),
+        "User-Agent": "HEMIne/".concat(package_json_1.version, " (Electron)")
+    }
+});
 function receiveTokens(session, tokens) {
     var _this = this;
     if (session.result) {
@@ -137,10 +148,6 @@ function receiveTokens(session, tokens) {
                         return [4 /*yield*/, keytar.setPassword("discord", "refreshToken", tokens.refreshToken)];
                     case 3:
                         _a.sent();
-                        new electron_1.Notification({
-                            title: "HEMIne Authentication",
-                            body: "Discord 로그인에 성공했어요!"
-                        }).show();
                         mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("LOGIN_SUCCESS", user);
                         return [2 /*return*/];
                 }
@@ -238,10 +245,6 @@ function login() {
                     return [4 /*yield*/, keytar.setPassword("discord", "refreshToken", refreshToken.refresh_token)];
                 case 8:
                     _a.sent();
-                    new electron_1.Notification({
-                        title: "HEMIne Authentication",
-                        body: "Discord에 로그인되었어요!"
-                    }).show();
                     mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("LOGIN_SUCCESS", userData);
                     return [2 /*return*/];
                 case 9: return [2 /*return*/];
@@ -284,6 +287,7 @@ ipc.on("PAGE_LOGIN_OPEN", function () {
 ipc.on("PAGE_CONNECTION_OPEN", function (_event, data) {
     if (connectionWindowEnabled) {
         connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("RPC_IS_CONNECTED", data);
+        connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("WS_IS_CONNECTED", SocketClientId ? true : false);
         connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.show();
         return;
     }
@@ -302,6 +306,7 @@ ipc.on("PAGE_CONNECTION_OPEN", function (_event, data) {
         connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.show();
         connectionWindowEnabled = true;
         connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("RPC_IS_CONNECTED", data);
+        connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("WS_IS_CONNECTED", SocketClientId ? true : false);
     });
 });
 /**
@@ -321,51 +326,67 @@ ipc.on("RPC_CONNECT", function (_event, data) { return __awaiter(void 0, void 0,
                 if (!accessToken)
                     return [2 /*return*/, isNotLogin()];
                 RPC = new discord_rpc_1.Client({ transport: "ipc" });
-                RPC.on("ready", function () { return __awaiter(void 0, void 0, void 0, function () {
-                    var _a, _b, Credentials, _i, Credentials_1, credential;
-                    var _c, _d, _e;
-                    return __generator(this, function (_f) {
-                        switch (_f.label) {
-                            case 0:
-                                _b = (_a = console).log;
-                                return [4 /*yield*/, RPC.getSelectedVoiceChannel()];
+                RPC.on("VOICE_CHANNEL_SELECT", function (data) { return __awaiter(void 0, void 0, void 0, function () {
+                    var _a, _b;
+                    return __generator(this, function (_c) {
+                        switch (_c.label) {
+                            case 0: return [4 /*yield*/, socket.emit("UNSET_USER")];
                             case 1:
-                                _b.apply(_a, [_f.sent()]); // => TODO
-                                RPC.setActivity({
-                                    details: "ㅎㅇ",
-                                    state: "스테이트",
-                                    instance: false
-                                });
-                                if (!(((_c = RPC.user) === null || _c === void 0 ? void 0 : _c.id) !== data.id)) return [3 /*break*/, 7];
-                                if (((_d = RPC.user) === null || _d === void 0 ? void 0 : _d.id) == undefined || ((_e = RPC.user) === null || _e === void 0 ? void 0 : _e.id) == null)
+                                _c.sent();
+                                if (!!data.channel_id) return [3 /*break*/, 3];
+                                return [4 /*yield*/, socket.emit("SET_USER", { userId: (_a = RPC.user) === null || _a === void 0 ? void 0 : _a.id })];
+                            case 2:
+                                _c.sent();
+                                return [2 /*return*/];
+                            case 3:
+                                socket.emit("SET_USER", { userId: (_b = RPC.user) === null || _b === void 0 ? void 0 : _b.id, guildId: data.guild_id });
+                                return [2 /*return*/];
+                        }
+                    });
+                }); });
+                RPC.on("ready", function () { return __awaiter(void 0, void 0, void 0, function () {
+                    var Credentials, _i, Credentials_1, credential, voiceChannel;
+                    var _a, _b, _c, _d;
+                    return __generator(this, function (_e) {
+                        switch (_e.label) {
+                            case 0:
+                                if (!(((_a = RPC.user) === null || _a === void 0 ? void 0 : _a.id) !== data.id)) return [3 /*break*/, 6];
+                                if (((_b = RPC.user) === null || _b === void 0 ? void 0 : _b.id) == undefined || ((_c = RPC.user) === null || _c === void 0 ? void 0 : _c.id) == null)
                                     return [2 /*return*/];
                                 new electron_1.Notification({
                                     title: "HEMIne Authentication",
                                     body: "올바르지 않은 Discord 계정입니다!"
                                 }).show();
                                 return [4 /*yield*/, keytar.findCredentials("discord")];
-                            case 2:
-                                Credentials = _f.sent();
+                            case 1:
+                                Credentials = _e.sent();
                                 _i = 0, Credentials_1 = Credentials;
-                                _f.label = 3;
-                            case 3:
-                                if (!(_i < Credentials_1.length)) return [3 /*break*/, 6];
+                                _e.label = 2;
+                            case 2:
+                                if (!(_i < Credentials_1.length)) return [3 /*break*/, 5];
                                 credential = Credentials_1[_i];
                                 return [4 /*yield*/, keytar.deletePassword("discord", credential.account)];
+                            case 3:
+                                _e.sent();
+                                _e.label = 4;
                             case 4:
-                                _f.sent();
-                                _f.label = 5;
-                            case 5:
                                 _i++;
-                                return [3 /*break*/, 3];
-                            case 6:
+                                return [3 /*break*/, 2];
+                            case 5:
                                 electron_1.app.quit();
-                                _f.label = 7;
+                                _e.label = 6;
+                            case 6: return [4 /*yield*/, RPC.getSelectedVoiceChannel()];
                             case 7:
-                                new electron_1.Notification({
-                                    title: "HEMIne",
-                                    body: "Discord Client에 연결되었어요!"
-                                }).show();
+                                voiceChannel = _e.sent();
+                                if (voiceChannel) {
+                                    socket.emit("SET_USER", {
+                                        userId: (_d = RPC.user) === null || _d === void 0 ? void 0 : _d.id,
+                                        guildId: voiceChannel.guild_id
+                                    });
+                                }
+                                RPC.subscribe("VOICE_CHANNEL_SELECT", function () { });
+                                mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("RPC_CONNECT_SUCCESS");
+                                connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("RPC_IS_CONNECTED", true);
                                 return [2 /*return*/];
                         }
                     });
@@ -384,8 +405,6 @@ ipc.on("RPC_CONNECT", function (_event, data) { return __awaiter(void 0, void 0,
                                     })];
                             case 1:
                                 _a.sent();
-                                mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("RPC_CONNECT_SUCCESS");
-                                connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("RPC_IS_CONNECTED", true);
                                 RPCClient = RPC;
                                 return [3 /*break*/, 3];
                             case 2:
@@ -429,10 +448,6 @@ ipc.on("RPC_DISCONNECT", function () { return __awaiter(void 0, void 0, void 0, 
         RPCClient = null;
         connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("RPC_IS_CONNECTED", false);
         mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("RPC_DISCONNECTED");
-        new electron_1.Notification({
-            title: "HEMIne",
-            body: "Discord Client와 연결이 해제되었어요!"
-        }).show();
         return [2 /*return*/];
     });
 }); });
@@ -468,6 +483,102 @@ ipc.on("APP_LOGOUT", function () { return __awaiter(void 0, void 0, void 0, func
         }
     });
 }); });
+/**
+ * @description HEMIne WS 연결
+ */
+ipc.on("WS_CONNECT", function () {
+    socket.connect();
+    socket.on("PLAYER_DATA", function (json) {
+        if ((json === null || json === void 0 ? void 0 : json.data) == null) {
+            RPCClient === null || RPCClient === void 0 ? void 0 : RPCClient.clearActivity();
+            return;
+        }
+        var startTime = new Date().getTime() - json.data.Player.current.position;
+        var endTime = startTime + json.data.Player.current.length;
+        RPCClient === null || RPCClient === void 0 ? void 0 : RPCClient.setActivity({
+            details: json.data.Player.current.title,
+            state: json.data.Player.current.author,
+            largeImageKey: json.data.Player.current.thumbnail,
+            largeImageText: json.data.Player.isPaused ? "일시정지" : "듣는중",
+            smallImageKey: "https://cdn.discordapp.com/avatars/1212287206702583829/010e224a684ca1097d51ce9fd566fa94.png",
+            smallImageText: "햄이네 HEMIne",
+            startTimestamp: startTime,
+            endTimestamp: endTime
+        });
+    });
+    socket.on("connect", function () {
+        SocketClientId = socket.id;
+        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("WS_CONNECTED");
+        new electron_1.Notification({
+            title: "HEMIne",
+            body: "HEMIne 서버와 연결되었어요!"
+        }).show();
+    });
+    socket.on("disconnect", function () {
+        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("WS_DISCONNECTED");
+        new electron_1.Notification({
+            title: "HEMIne",
+            body: "HEMIne 서버로부터 연결이 끊어졌습니다. 기능을 사용할 수 없습니다."
+        }).show();
+        electron_1.app.quit();
+    });
+    socket.on("connect_error", function () {
+        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("WS_DISCONNECTED");
+        new electron_1.Notification({
+            title: "HEMIne",
+            body: "HEMIne 서버와 연결할 수 없습니다. 기능을 사용할 수 없습니다."
+        }).show();
+        electron_1.app.quit();
+    });
+    socket.on("connect_timeout", function () {
+        mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents.send("WS_DISCONNECTED");
+        new electron_1.Notification({
+            title: "HEMIne",
+            body: "HEMIne 서버 연결이 시간 초과되었습니다. 다시 시도해주세요."
+        }).show();
+    });
+});
+/**
+ * @description HEMIne WS 연결 여부
+ */
+ipc.on("WS_IS_CONNECTED", function () {
+    if (!SocketClientId) {
+        connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("WS_IS_CONNECTED", false);
+        return;
+    }
+    else {
+        connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.webContents.send("WS_IS_CONNECTED", true);
+    }
+});
+function EncodeBase64(data) {
+    return Buffer.from(data).toString("base64");
+}
+function Xor(str, key) {
+    var result = "";
+    for (var i = 0; i < str.length; i++) {
+        result += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    }
+    return result;
+}
+function Crypto(string) {
+    var encrypted = [];
+    var firstBase64 = EncodeBase64(string);
+    var Second_Xor = Xor(firstBase64, "Remuring");
+    var EecodeData64 = EncodeBase64(Second_Xor);
+    for (var i = 0; i < 10; i++) {
+        EecodeData64 = EncodeBase64(EecodeData64);
+        encrypted.push(EecodeData64);
+    }
+    var returnData = encrypted[encrypted.length - 1];
+    return "Remuring{'".concat(returnData, "'}");
+}
+function generateKey() {
+    var date = new Date();
+    var string = "".concat(date.getFullYear(), "-").concat(date.getMonth() + 1, "-").concat(date.getDate());
+    var newDate = new Date(string);
+    var key = newDate.getTime().toString();
+    return key;
+}
 ipc.on("PAGE_CONNECTION_CLOSE", function () {
     connectionWindow === null || connectionWindow === void 0 ? void 0 : connectionWindow.hide();
 });

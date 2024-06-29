@@ -5,6 +5,8 @@ import * as keytar from "keytar";
 import * as url from "url";
 import { Client } from "@remuring/discord-rpc";
 import { AuthClient } from "./Auth";
+import { io } from "socket.io-client";
+import { version } from "../package.json";
 
 const BASE_URL = "http://localhost:3000";
 const ipc = ipcMain;
@@ -14,6 +16,7 @@ let childWindow: BrowserWindow | null;
 let connectionWindow: BrowserWindow | null;
 let connectionWindowEnabled = false;
 let RPCClient: Client | null;
+let SocketClientId: string | null = null;
 
 function createMainWindow(): void {
   mainWindow = new BrowserWindow({
@@ -86,6 +89,15 @@ function createMainWindow(): void {
   }
 }
 
+const socket = io("http://localhost:5000", {
+  autoConnect: false,
+  transports: ["websocket"],
+  extraHeaders: {
+    Authorization: `${Crypto(generateKey())}`,
+    "User-Agent": `HEMIne/${version} (Electron)`,
+  },
+});
+
 function receiveTokens(
   session: AuthClient,
   tokens: { accessToken: string; refreshToken: string }
@@ -103,11 +115,6 @@ function receiveTokens(
       await keytar.setPassword("discord", "userId", user.id);
       await keytar.setPassword("discord", "accessToken", tokens.accessToken);
       await keytar.setPassword("discord", "refreshToken", tokens.refreshToken);
-
-      new Notification({
-        title: "HEMIne Authentication",
-        body: "Discord 로그인에 성공했어요!",
-      }).show();
 
       mainWindow?.webContents.send("LOGIN_SUCCESS", user);
 
@@ -218,11 +225,6 @@ function login() {
         refreshToken.refresh_token
       );
 
-      new Notification({
-        title: "HEMIne Authentication",
-        body: "Discord에 로그인되었어요!",
-      }).show();
-
       mainWindow?.webContents.send("LOGIN_SUCCESS", userData);
 
       return;
@@ -273,6 +275,10 @@ ipc.on("PAGE_LOGIN_OPEN", () => {
 ipc.on("PAGE_CONNECTION_OPEN", (_event, data) => {
   if (connectionWindowEnabled) {
     connectionWindow?.webContents.send("RPC_IS_CONNECTED", data);
+    connectionWindow?.webContents.send(
+      "WS_IS_CONNECTED",
+      SocketClientId ? true : false
+    );
     connectionWindow?.show();
     return;
   }
@@ -293,6 +299,10 @@ ipc.on("PAGE_CONNECTION_OPEN", (_event, data) => {
     connectionWindow?.show();
     connectionWindowEnabled = true;
     connectionWindow?.webContents.send("RPC_IS_CONNECTED", data);
+    connectionWindow?.webContents.send(
+      "WS_IS_CONNECTED",
+      SocketClientId ? true : false
+    );
   });
 });
 
@@ -307,14 +317,16 @@ ipc.on("RPC_CONNECT", async (_event, data) => {
 
   const RPC = new Client({ transport: "ipc" });
 
-  RPC.on("ready", async () => {
-    console.log(await RPC.getSelectedVoiceChannel()); // => TODO
-    RPC.setActivity({
-      details: "ㅎㅇ",
-      state: "스테이트",
-      instance: false,
-    });
+  RPC.on("VOICE_CHANNEL_SELECT", async (data) => {
+    await socket.emit("UNSET_USER");
+    if (!data.channel_id) {
+      await socket.emit("SET_USER", { userId: RPC.user?.id });
+      return;
+    }
+    socket.emit("SET_USER", { userId: RPC.user?.id, guildId: data.guild_id });
+  });
 
+  RPC.on("ready", async () => {
     if (RPC.user?.id !== data.id) {
       if (RPC.user?.id == undefined || RPC.user?.id == null) return;
       new Notification({
@@ -331,10 +343,18 @@ ipc.on("RPC_CONNECT", async (_event, data) => {
       app.quit();
     }
 
-    new Notification({
-      title: "HEMIne",
-      body: "Discord Client에 연결되었어요!",
-    }).show();
+    const voiceChannel = await RPC.getSelectedVoiceChannel();
+    if (voiceChannel) {
+      socket.emit("SET_USER", {
+        userId: RPC.user?.id,
+        guildId: voiceChannel.guild_id,
+      });
+    }
+
+    RPC.subscribe("VOICE_CHANNEL_SELECT", () => {});
+
+    mainWindow?.webContents.send("RPC_CONNECT_SUCCESS");
+    connectionWindow?.webContents.send("RPC_IS_CONNECTED", true);
   });
 
   let retryCount = 0;
@@ -346,9 +366,6 @@ ipc.on("RPC_CONNECT", async (_event, data) => {
         scopes: ["rpc", "rpc.voice.read"],
         accessToken: accessToken,
       });
-
-      mainWindow?.webContents.send("RPC_CONNECT_SUCCESS");
-      connectionWindow?.webContents.send("RPC_IS_CONNECTED", true);
 
       RPCClient = RPC;
     } catch (error: any) {
@@ -384,10 +401,6 @@ ipc.on("RPC_DISCONNECT", async () => {
   RPCClient = null;
   connectionWindow?.webContents.send("RPC_IS_CONNECTED", false);
   mainWindow?.webContents.send("RPC_DISCONNECTED");
-  new Notification({
-    title: "HEMIne",
-    body: "Discord Client와 연결이 해제되었어요!",
-  }).show();
   return;
 });
 
@@ -409,6 +422,126 @@ ipc.on("APP_LOGOUT", async () => {
   app.quit();
 });
 
+/**
+ * @description HEMIne WS 연결
+ */
+ipc.on("WS_CONNECT", () => {
+  socket.connect();
+
+  socket.on("PLAYER_DATA", (json: PlayerData | null) => {
+    if (json?.data == null) {
+      RPCClient?.clearActivity();
+      return;
+    }
+
+    let startTime = new Date().getTime() - json.data.Player.current.position;
+    let endTime = startTime + json.data.Player.current.length;
+
+    RPCClient?.setActivity({
+      details: json.data.Player.current.title,
+      state: json.data.Player.current.author,
+      largeImageKey: json.data.Player.current.thumbnail,
+      largeImageText: json.data.Player.isPaused ? "일시정지" : "듣는중",
+      smallImageKey:
+        "https://cdn.discordapp.com/avatars/1212287206702583829/010e224a684ca1097d51ce9fd566fa94.png",
+      smallImageText: "햄이네 HEMIne",
+      startTimestamp: startTime,
+      endTimestamp: endTime,
+    });
+  });
+
+  socket.on("connect", () => {
+    SocketClientId = socket.id as string;
+    mainWindow?.webContents.send("WS_CONNECTED");
+    new Notification({
+      title: "HEMIne",
+      body: "HEMIne 서버와 연결되었어요!",
+    }).show();
+  });
+
+  socket.on("disconnect", () => {
+    mainWindow?.webContents.send("WS_DISCONNECTED");
+    new Notification({
+      title: "HEMIne",
+      body: "HEMIne 서버로부터 연결이 끊어졌습니다. 기능을 사용할 수 없습니다.",
+    }).show();
+
+    app.quit();
+  });
+
+  socket.on("connect_error", () => {
+    mainWindow?.webContents.send("WS_DISCONNECTED");
+    new Notification({
+      title: "HEMIne",
+      body: "HEMIne 서버와 연결할 수 없습니다. 기능을 사용할 수 없습니다.",
+    }).show();
+
+    app.quit();
+  });
+
+  socket.on("connect_timeout", () => {
+    mainWindow?.webContents.send("WS_DISCONNECTED");
+    new Notification({
+      title: "HEMIne",
+      body: "HEMIne 서버 연결이 시간 초과되었습니다. 다시 시도해주세요.",
+    }).show();
+  });
+});
+
+/**
+ * @description HEMIne WS 연결 여부
+ */
+ipc.on("WS_IS_CONNECTED", () => {
+  if (!SocketClientId) {
+    connectionWindow?.webContents.send("WS_IS_CONNECTED", false);
+    return;
+  } else {
+    connectionWindow?.webContents.send("WS_IS_CONNECTED", true);
+  }
+});
+
+function EncodeBase64(data: string) {
+  return Buffer.from(data).toString("base64");
+}
+
+function Xor(str: string, key: string) {
+  let result = "";
+  for (let i = 0; i < str.length; i++) {
+    result += String.fromCharCode(
+      str.charCodeAt(i) ^ key.charCodeAt(i % key.length)
+    );
+  }
+  return result;
+}
+
+function Crypto(string: string) {
+  let encrypted = [];
+
+  let firstBase64 = EncodeBase64(string);
+
+  let Second_Xor = Xor(firstBase64, "Remuring");
+
+  let EecodeData64 = EncodeBase64(Second_Xor);
+
+  for (let i = 0; i < 10; i++) {
+    EecodeData64 = EncodeBase64(EecodeData64);
+
+    encrypted.push(EecodeData64);
+  }
+
+  let returnData = encrypted[encrypted.length - 1];
+
+  return `Remuring{'${returnData}'}`;
+}
+
+function generateKey() {
+  let date = new Date();
+  let string = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+  let newDate = new Date(string);
+  let key = newDate.getTime().toString();
+  return key;
+}
+
 ipc.on("PAGE_CONNECTION_CLOSE", () => {
   connectionWindow?.hide();
 });
@@ -426,3 +559,23 @@ app.on("activate", (): void => {
     createMainWindow();
   }
 });
+
+interface PlayerData {
+  data: {
+    guildId: string;
+    userId: string;
+    voiceChannelId: string;
+    textChannelId: string;
+    Player: {
+      current: {
+        title: string;
+        thumbnail: string;
+        position: number;
+        author: string;
+        length: number;
+      };
+      isPlaying: boolean;
+      isPaused: boolean;
+    };
+  };
+}
