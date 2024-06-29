@@ -298,12 +298,26 @@ ipc.on("PAGE_CONNECTION_OPEN", (_event, data) => {
   connectionWindow?.once("ready-to-show", () => {
     connectionWindow?.show();
     connectionWindowEnabled = true;
-    connectionWindow?.webContents.send("RPC_IS_CONNECTED", data);
+    connectionWindow?.webContents.send(
+      "RPC_IS_CONNECTED",
+      RPCClient ? true : false
+    );
     connectionWindow?.webContents.send(
       "WS_IS_CONNECTED",
       SocketClientId ? true : false
     );
   });
+});
+
+/**
+ * @description Discord RPC 연결여부
+ */
+ipc.on("IS_PRC_CONNECTED", () => {
+  if (RPCClient) {
+    return connectionWindow?.webContents.send("RPC_IS_CONNECTED", true);
+  } else {
+    return connectionWindow?.webContents.send("RPC_IS_CONNECTED", false);
+  }
 });
 
 /**
@@ -428,26 +442,47 @@ ipc.on("APP_LOGOUT", async () => {
 ipc.on("WS_CONNECT", () => {
   socket.connect();
 
-  socket.on("PLAYER_DATA", (json: PlayerData | null) => {
+  socket.on("PLAYER_DATA", async (json: PlayerData | null) => {
     if (json?.data == null) {
       RPCClient?.clearActivity();
+      mainWindow?.webContents.send("SONG_DATA", null);
       return;
     }
 
-    let startTime = new Date().getTime() - json.data.Player.current.position;
-    let endTime = startTime + json.data.Player.current.length;
+    const voiceChannel = await RPCClient?.getSelectedVoiceChannel();
+    if (voiceChannel) {
+      if (
+        voiceChannel.voice_states?.find(
+          (v) => v.user.id == "1212287206702583829"
+        )
+      ) {
+        let startTime =
+          new Date().getTime() - json.data.Player.current.position;
+        let endTime = startTime + json.data.Player.current.length;
 
-    RPCClient?.setActivity({
-      details: json.data.Player.current.title,
-      state: json.data.Player.current.author,
-      largeImageKey: json.data.Player.current.thumbnail,
-      largeImageText: json.data.Player.isPaused ? "일시정지" : "듣는중",
-      smallImageKey:
-        "https://cdn.discordapp.com/avatars/1212287206702583829/010e224a684ca1097d51ce9fd566fa94.png",
-      smallImageText: "햄이네 HEMIne",
-      startTimestamp: startTime,
-      endTimestamp: endTime,
-    });
+        RPCClient?.setActivity({
+          details: json.data.Player.current.title,
+          state: json.data.Player.current.author,
+          largeImageKey: json.data.Player.current.thumbnail,
+          largeImageText: json.data.Player.isPaused ? "일시정지" : "듣는중",
+          smallImageKey:
+            "https://cdn.discordapp.com/avatars/1212287206702583829/010e224a684ca1097d51ce9fd566fa94.png",
+          smallImageText: "햄이네 HEMIne",
+          startTimestamp: startTime,
+          endTimestamp: endTime,
+        });
+
+        mainWindow?.webContents.send("SONG_DATA", json);
+      } else {
+        RPCClient?.clearActivity();
+        mainWindow?.webContents.send("SONG_DATA", null);
+        return;
+      }
+    } else {
+      RPCClient?.clearActivity();
+      mainWindow?.webContents.send("SONG_DATA", null);
+      return;
+    }
   });
 
   socket.on("connect", () => {

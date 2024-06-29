@@ -10,6 +10,7 @@
     height: $height-artwork;
     width: $height-artwork;
     object-fit: cover;
+    transform-origin: center;
   }
 }
 
@@ -22,6 +23,8 @@
     img {
       height: $height-artwork * 1.25;
       width: $height-artwork * 1.25;
+      transform-origin: center;
+      object-fit: cover;
     }
   }
 }

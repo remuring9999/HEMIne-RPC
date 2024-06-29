@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import colors from "../../../Constants/Colors";
 import gradients from "../../../Constants/Gradients";
 import shadow from "../../../Utils/Shadows";
@@ -19,6 +19,18 @@ function PlayerSeekBar({
       elapsed: parseInt(value),
     });
   };
+
+  useEffect(() => {
+    if (!songState.isPlaying) return;
+    const interval = setInterval(() => {
+      setSongState({
+        ...songState,
+        elapsed: songState.elapsed + 1,
+      });
+    }, 1100);
+
+    return () => clearInterval(interval);
+  });
 
   return (
     <div className="player__seek-bar--wrapper">

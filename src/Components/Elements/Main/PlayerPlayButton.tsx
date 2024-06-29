@@ -16,14 +16,6 @@ function PlayerPlayButton({
   setSongState: ReactSetAction<SongState>;
 }) {
   const currentPalette = songState.currentSong[0].palette;
-  const playPauseHandler = () => {
-    setUiState({ ...uiState, songPlaying: !uiState.songPlaying });
-    if (uiState.songPlaying === true) {
-      setSongState({ ...songState, isPlaying: false });
-    } else {
-      setSongState({ ...songState, isPlaying: true });
-    }
-  };
 
   const PlayPauseButton = () => {
     if (uiState.songPlaying) {
@@ -40,7 +32,6 @@ function PlayerPlayButton({
   return (
     <div
       className="player__control--play-button"
-      onClick={playPauseHandler}
       style={{
         boxShadow: `${shadow(
           0,

@@ -104,7 +104,7 @@ class AuthClient {
         this.client_id
       }&redirect_uri=${encodeURI(
       this.redirect_uri
-    )}&response_type=code&scope=identify+rpc+rpc.voice.read+email`;
+    )}&response_type=code&scope=identify+rpc+rpc.voice.read`;
   };
 }
 

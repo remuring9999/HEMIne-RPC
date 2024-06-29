@@ -33,7 +33,7 @@ declare global {
     artist: string;
     coverUrl: string;
     thumbUrl: string;
-    palette: keyof typeof ThemeColors;
+    palette: keyof typeof ThemeColors | string;
     id: string;
   }
 
@@ -56,6 +56,36 @@ declare global {
       value: number;
       name: string;
       origin: string | FlagNames;
+    };
+  }
+
+  interface PlayerData {
+    data: {
+      guildId: string;
+      userId: string;
+      voiceChannelId: string;
+      textChannelId: string;
+      Player: {
+        current: {
+          title: string;
+          thumbnail: string;
+          position: number;
+          author: string;
+          length: number;
+        };
+        queue: [
+          {
+            title: string;
+            thumbUrl: string;
+            artist: string;
+            coverUrl: string;
+            palette: string;
+            id: string;
+          }
+        ];
+        isPlaying: boolean;
+        isPaused: boolean;
+      };
     };
   }
 }
