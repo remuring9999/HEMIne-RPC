@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "main": "./public/electron.js",
+  "icon": "./public/favicon.ico",
   "homepage": "./",
   "dependencies": {
     "@remuring/discord-rpc": "git+https://github.com/remuring9999/RPC.git",
@@ -50,6 +51,12 @@
     "build:linux": "npm run build -- --linux",
     "build:win": "npm run build -- --win",
     "predist": "npm run compile-main"
+  },
+  "build": {
+    "appId": "com.hemine.rpc",
+    "win": {
+      "icon": "./public/favicon.ico"
+    }
   },
   "eslintConfig": {
     "extends": [

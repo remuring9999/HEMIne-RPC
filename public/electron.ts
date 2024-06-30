@@ -1,5 +1,11 @@
 import * as path from "path";
-import { app, BrowserWindow, Notification, ipcMain } from "electron";
+import {
+  app,
+  BrowserWindow,
+  Notification,
+  ipcMain,
+  globalShortcut,
+} from "electron";
 import * as isDev from "electron-is-dev";
 import * as keytar from "keytar";
 import * as url from "url";
@@ -31,6 +37,7 @@ function createMainWindow(): void {
       contextIsolation: true,
       nodeIntegration: true,
       preload: path.join(__dirname, "preload.js"),
+      devTools: !app.isPackaged,
     },
   });
 
@@ -53,6 +60,7 @@ function createMainWindow(): void {
       contextIsolation: true,
       nodeIntegration: true,
       preload: path.join(__dirname, "preload.js"),
+      devTools: !app.isPackaged,
     },
   });
 
@@ -69,6 +77,7 @@ function createMainWindow(): void {
       contextIsolation: true,
       nodeIntegration: true,
       preload: path.join(__dirname, "preload.js"),
+      devTools: !app.isPackaged,
     },
   });
 
@@ -83,6 +92,17 @@ function createMainWindow(): void {
   mainWindow.on("closed", (): void => {
     mainWindow = null;
   });
+
+  globalShortcut.register("CommandOrControl+R", () => {});
+
+  globalShortcut.register("F5", () => {});
+
+  globalShortcut.register("F12", () => {});
+  globalShortcut.register("CommandOrControl+Shift+I", () => {});
+  globalShortcut.register("CommandOrControl+Shift+J", () => {});
+  globalShortcut.register("CommandOrControl+Shift+C", () => {});
+  globalShortcut.register("CommandOrControl+Shift+K", () => {});
+  globalShortcut.register("CommandOrControl+Shift+U", () => {});
 
   if (process.platform == "win32") {
     app.setAppUserModelId("HEMIne");

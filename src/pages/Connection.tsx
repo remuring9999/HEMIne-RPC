@@ -93,7 +93,7 @@ function Connection() {
             <img
               alt={badge.data.name}
               id="badge"
-              src={`/assets/DiscordBadges/${badge.data.origin}.svg`}
+              src={`./assets/DiscordBadges/${badge.data.origin}.svg`}
             ></img>
           ))}
         </div>

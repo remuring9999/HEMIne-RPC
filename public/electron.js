@@ -65,7 +65,8 @@ function createMainWindow() {
         webPreferences: {
             contextIsolation: true,
             nodeIntegration: true,
-            preload: path.join(__dirname, "preload.js")
+            preload: path.join(__dirname, "preload.js"),
+            devTools: !electron_1.app.isPackaged
         }
     });
     if (isDev) {
@@ -86,7 +87,8 @@ function createMainWindow() {
         webPreferences: {
             contextIsolation: true,
             nodeIntegration: true,
-            preload: path.join(__dirname, "preload.js")
+            preload: path.join(__dirname, "preload.js"),
+            devTools: !electron_1.app.isPackaged
         }
     });
     connectionWindow = new electron_1.BrowserWindow({
@@ -101,7 +103,8 @@ function createMainWindow() {
         webPreferences: {
             contextIsolation: true,
             nodeIntegration: true,
-            preload: path.join(__dirname, "preload.js")
+            preload: path.join(__dirname, "preload.js"),
+            devTools: !electron_1.app.isPackaged
         }
     });
     mainWindow.once("ready-to-show", function () {
@@ -114,6 +117,14 @@ function createMainWindow() {
     mainWindow.on("closed", function () {
         mainWindow = null;
     });
+    electron_1.globalShortcut.register("CommandOrControl+R", function () { });
+    electron_1.globalShortcut.register("F5", function () { });
+    electron_1.globalShortcut.register("F12", function () { });
+    electron_1.globalShortcut.register("CommandOrControl+Shift+I", function () { });
+    electron_1.globalShortcut.register("CommandOrControl+Shift+J", function () { });
+    electron_1.globalShortcut.register("CommandOrControl+Shift+C", function () { });
+    electron_1.globalShortcut.register("CommandOrControl+Shift+K", function () { });
+    electron_1.globalShortcut.register("CommandOrControl+Shift+U", function () { });
     if (process.platform == "win32") {
         electron_1.app.setAppUserModelId("HEMIne");
     }
@@ -514,8 +525,6 @@ ipc.on("WS_CONNECT", function () {
                 case 1:
                     voiceChannel = _b.sent();
                     if (voiceChannel) {
-                        console.log("음성채널 감지");
-                        console.log(voiceChannel.voice_states);
                         if ((_a = voiceChannel.voice_states) === null || _a === void 0 ? void 0 : _a.find(function (v) { return v.user.id == "1212287206702583829"; })) {
                             startTime = new Date().getTime() - json.data.Player.current.position;
                             endTime = startTime + json.data.Player.current.length;
