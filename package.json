@@ -53,7 +53,7 @@
     "predist": "npm run compile-main"
   },
   "build": {
-    "appId": "com.hemine.rpc",
+    "appId": "com.hemine.app",
     "win": {
       "icon": "./public/favicon.ico"
     }
