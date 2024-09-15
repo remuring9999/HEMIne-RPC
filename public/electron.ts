@@ -109,11 +109,11 @@ function createMainWindow(): void {
   }
 }
 
-const socket = io("http://localhost:5000", {
+const socket = io("", {
   autoConnect: false,
   transports: ["websocket"],
   extraHeaders: {
-    Authorization: `${Crypto(generateKey())}`,
+    Authorization: `asdf`,
     "User-Agent": `HEMIne/${version} (Electron)`,
   },
 });
@@ -203,13 +203,7 @@ function login() {
     } else {
       const token = await keytar.getPassword("discord", "refreshToken");
 
-      const auth = new AuthClient(
-        receiveTokens,
-        "1212287206702583829",
-        "7plMXfI4PuvxMG-EVxZx7fyyJTZ1eH5i",
-        "http://localhost:205/auth/discord/callback",
-        205
-      );
+      const auth = new AuthClient(receiveTokens, "", "", "", 205);
       auth._server.close();
 
       const refreshToken = await auth.refreshToken(token);
@@ -396,7 +390,7 @@ ipc.on("RPC_CONNECT", async (_event, data) => {
   const attemptLogin = async () => {
     try {
       await RPC.login({
-        clientId: "1212287206702583829",
+        clientId: "",
         scopes: ["rpc", "rpc.voice.read"],
         accessToken: accessToken,
       });
@@ -471,11 +465,7 @@ ipc.on("WS_CONNECT", () => {
 
     const voiceChannel = await RPCClient?.getSelectedVoiceChannel();
     if (voiceChannel) {
-      if (
-        voiceChannel.voice_states?.find(
-          (v) => v.user.id == "1212287206702583829"
-        )
-      ) {
+      if (voiceChannel.voice_states?.find((v) => v.user.id == "")) {
         let startTime =
           new Date().getTime() - json.data.Player.current.position;
         let endTime = startTime + json.data.Player.current.length;
@@ -485,8 +475,7 @@ ipc.on("WS_CONNECT", () => {
           state: json.data.Player.current.author,
           largeImageKey: json.data.Player.current.thumbnail,
           largeImageText: json.data.Player.isPaused ? "일시정지" : "듣는중",
-          smallImageKey:
-            "https://cdn.discordapp.com/avatars/1212287206702583829/010e224a684ca1097d51ce9fd566fa94.png",
+          smallImageKey: "",
           smallImageText: "햄이네 HEMIne",
           startTimestamp: startTime,
           endTimestamp: endTime,
@@ -554,48 +543,6 @@ ipc.on("WS_IS_CONNECTED", () => {
     connectionWindow?.webContents.send("WS_IS_CONNECTED", true);
   }
 });
-
-function EncodeBase64(data: string) {
-  return Buffer.from(data).toString("base64");
-}
-
-function Xor(str: string, key: string) {
-  let result = "";
-  for (let i = 0; i < str.length; i++) {
-    result += String.fromCharCode(
-      str.charCodeAt(i) ^ key.charCodeAt(i % key.length)
-    );
-  }
-  return result;
-}
-
-function Crypto(string: string) {
-  let encrypted = [];
-
-  let firstBase64 = EncodeBase64(string);
-
-  let Second_Xor = Xor(firstBase64, "Remuring");
-
-  let EecodeData64 = EncodeBase64(Second_Xor);
-
-  for (let i = 0; i < 10; i++) {
-    EecodeData64 = EncodeBase64(EecodeData64);
-
-    encrypted.push(EecodeData64);
-  }
-
-  let returnData = encrypted[encrypted.length - 1];
-
-  return `Remuring{'${returnData}'}`;
-}
-
-function generateKey() {
-  let date = new Date();
-  let string = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-  let newDate = new Date(string);
-  let key = newDate.getTime().toString();
-  return key;
-}
 
 ipc.on("PAGE_CONNECTION_CLOSE", () => {
   connectionWindow?.hide();

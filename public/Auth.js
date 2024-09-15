@@ -47,6 +47,7 @@ class AuthClient {
         await this.stopListening();
         return res.send("Authentication successful! Redirecting ..");
       } catch (error) {
+        console.log(error);
         await this.stopListening();
         return res.send("An error occurred while trying to authenticate.");
       }

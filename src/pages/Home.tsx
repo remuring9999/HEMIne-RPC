@@ -24,10 +24,8 @@ function Home() {
     {
       title: "재생중인 음악이 없다네",
       artist: "햄이네",
-      coverUrl:
-        "https://cdn.discordapp.com/avatars/1212287206702583829/010e224a684ca1097d51ce9fd566fa94.png?size=4096",
-      thumbUrl:
-        "https://cdn.discordapp.com/avatars/1212287206702583829/010e224a684ca1097d51ce9fd566fa94.png?size=4096",
+      coverUrl: "",
+      thumbUrl: "",
       palette: "coral",
       id: "1",
     },
@@ -56,10 +54,8 @@ function Home() {
           {
             title: "재생중인 음악이 없다네",
             artist: "햄이네",
-            coverUrl:
-              "https://cdn.discordapp.com/avatars/1212287206702583829/010e224a684ca1097d51ce9fd566fa94.png?size=4096",
-            thumbUrl:
-              "https://cdn.discordapp.com/avatars/1212287206702583829/010e224a684ca1097d51ce9fd566fa94.png?size=4096",
+            coverUrl: "",
+            thumbUrl: "",
             palette: "coral",
             id: "1",
           },
@@ -70,10 +66,8 @@ function Home() {
             {
               title: "재생중인 음악이 없다네",
               artist: "햄이네",
-              coverUrl:
-                "https://cdn.discordapp.com/avatars/1212287206702583829/010e224a684ca1097d51ce9fd566fa94.png?size=4096",
-              thumbUrl:
-                "https://cdn.discordapp.com/avatars/1212287206702583829/010e224a684ca1097d51ce9fd566fa94.png?size=4096",
+              coverUrl: "",
+              thumbUrl: "",
               palette: "coral",
               id: "1",
             },

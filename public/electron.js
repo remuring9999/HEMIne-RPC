@@ -129,7 +129,7 @@ function createMainWindow() {
         electron_1.app.setAppUserModelId("HEMIne");
     }
 }
-var socket = (0, socket_io_client_1.io)("http://localhost:5000", {
+var socket = (0, socket_io_client_1.io)("http://116.126.99.186:5000", {
     autoConnect: false,
     transports: ["websocket"],
     extraHeaders: {
